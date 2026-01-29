@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Control Center</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+    body{margin:0;font-family:Arial, sans-serif;background:#eef1f5}
+    header{background:#000;color:#fff;padding:15px;text-align:center;font-size:20px}
+    .container{padding:20px; max-width: 1000px; margin: auto;}
+    .card{background:#fff;padding:20px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+    table{width:100%;border-collapse:collapse;margin-top:15px;background:#fff}
+    th,td{border:1px solid #ddd;padding:12px;text-align:center}
+    th{background:#f8f9fa}
+    .proof-btn{display:inline-block; padding:5px 10px; background:#1976d2; color:white; text-decoration:none; border-radius:4px; font-size:12px; margin:2px}
+    .approve-btn{background:#28a745; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px}
+    .chan-id{font-weight:bold; color:#28a745; font-size:11px; display:block}
+    .slot-input{width:70%; padding:8px; margin:5px; border:1px solid #ddd; border-radius:4px}
+    .save-btn{padding:8px 15px; background:#333; color:white; border:none; border-radius:4px; cursor:pointer}
+</style>
+</head>
+<body>
+<header>Admin Control - All Tasks & Approvals</header>
+<div class="container">
+    
+    <div class="card">
+        <h3>Manage Task Links</h3>
+        <p style="font-size:12px;color:gray">Yahan se Videos aur Channels ke links update karein.</p>
+        <div id="setupArea">
+            <h4>Video Slots (1-10)</h4>
+            <div id="videoSlots"></div>
+            <hr>
+            <h4>Channel Slots (1-5)</h4>
+            <div id="channelSlots"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Registered Users & Proof Approvals</h3>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>User Name</th>
+                        <th>Email / Phone</th>
+                        <th>Watch Count</th>
+                        <th>Subscription Proofs</th>
+                    </tr>
+                </thead>
+                <tbody id="usersList">
+                    <tr><td colspan="4">Loading data...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ",
+  authDomain: "own-live-steam-web.firebaseapp.com",
+  projectId: "own-live-steam-web",
+  databaseURL: "https://own-live-steam-web-default-rtdb.firebaseio.com",
+  messagingSenderId: "132045886996",
+  appId: "1:132045886996:web:8a6d937c3548afd2477901"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const rtdb = firebase.database();
+
+// --- LOGIC: DISPLAY USERS & APPROVE PROOFS ---
+rtdb.ref('users').on('value', snap => {
+    const list = document.getElementById("usersList");
+    list.innerHTML = "";
+    snap.forEach(child => {
+        const uid = child.key;
+        const u = child.val();
+        const proofs = u.proofs || {};
+        const completed = u.completed || "";
+        let proofHtml = "";
+
+        Object.keys(proofs).forEach(cid => {
+            const isApproved = completed.includes(cid);
+            proofHtml += `
+                <div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px">
+                    <span class="chan-id">Slot: ${cid}</span>
+                    <a href="${proofs[cid]}" target="_blank" class="proof-btn">View Link</a><br>
+                    ${!isApproved ? 
+                        `<button class="approve-btn" onclick="approveSub('${uid}','${cid}')">Approve & Add Point</button>` : 
+                        '<span style="color:blue;font-size:11px">✓ Points Added</span>'}
+                </div>`;
+        });
+
+        list.innerHTML += `<tr>
+            <td><strong>${u.name || 'User'}</strong></td>
+            <td>${u.email || 'N/A'}</td>
+            <td>${u.watch || 0}</td>
+            <td>${proofHtml || '<i style="color:gray">No proof yet</i>'}</td>
+        </tr>`;
+    });
+});
+
+function approveSub(uid, cid) {
+    rtdb.ref('users/' + uid).once('value', s => {
+        const d = s.val();
+        rtdb.ref('users/' + uid).update({
+            subPoints: (d.subPoints || 0) + 1,
+            completed: (d.completed || "") + "," + cid
+        }).then(() => alert("Point Approved and Added to User!"));
+    });
+}
+
+// --- LOGIC: MANAGE SLOTS (VIDEOS & CHANNELS) ---
+function initSlots() {
+    let vHtml = "";
+    for(let i=1; i<=10; i++) {
+        vHtml += `<input id="v${i}" class="slot-input" placeholder="Video Link ${i}">
+                  <button class="save-btn" onclick="saveV(${i})">Save</button><br>`;
+    }
+    document.getElementById("videoSlots").innerHTML = vHtml;
+
+    let cHtml = "";
+    for(let i=1; i<=5; i++) {
+        cHtml += `<input id="c${i}" class="slot-input" placeholder="Channel Link ${i}">
+                  <button class="save-btn" style="background:#28a745" onclick="saveC(${i})">Save</button><br>`;
+    }
+    document.getElementById("channelSlots").innerHTML = cHtml;
+
+    // Load existing links
+    for(let i=1; i<=10; i++) db.collection("videos").doc("slot"+i).get().then(d=>{if(d.exists)document.getElementById("v"+i).value=d.data().link;});
+    for(let i=1; i<=5; i++) db.collection("channels").doc("chan"+i).get().then(d=>{if(d.exists)document.getElementById("c"+i).value=d.data().link;});
+}
+
+function saveV(n){ db.collection("videos").doc("slot"+n).set({slot:n, link:document.getElementById("v"+n).value, enabled:true}).then(()=>alert("Video "+n+" Updated!")); }
+function saveC(n){ db.collection("channels").doc("chan"+n).set({slot:n, link:document.getElementById("c"+n).value, enabled:true}).then(()=>alert("Channel "+n+" Updated!")); }
+
+initSlots();
+</script>
+</body>
+</html>
