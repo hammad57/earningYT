@@ -13,6 +13,13 @@
         #sidebar { width: 280px; background: #1a1a1a; color: white; height: 100vh; padding: 20px; position: fixed; box-sizing: border-box; overflow-y: auto; z-index: 100; }
         #main-container { margin-left: 280px; width: calc(100% - 280px); padding: 20px; box-sizing: border-box; }
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
+        
+        /* Stats Styling */
+        .stat-box { cursor: pointer; padding: 10px; border-radius: 8px; transition: background 0.3s; flex: 1; }
+        .stat-box:hover { background: #f8f9fa; }
+        .history-panel { display: none; margin-top: 10px; text-align: left; background: #fafafa; border-top: 1px solid #eee; padding: 10px; border-radius: 0 0 8px 8px; font-size: 13px; max-height: 150px; overflow-y: auto; }
+        .history-item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+
         .sidebar-card { background: #2d2d2d; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; border: 1px solid #444; }
         input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; border: none; background: #1976d2; color: white; }
@@ -34,7 +41,7 @@
         <button onclick="updateUserPassword()" style="background:#444; padding: 8px;">Update</button>
     </div>
     <div class="sidebar-card" style="border-left: 4px solid #ffc107;">
-        <div style="font-size:10px; color:#aaa">Balance (PKR)</div>
+        <div style="font-size:10px; color:#aaa">Available Balance</div>
         <div style="font-size:20px; font-weight:bold; color:#28a745">Rs <span id="totalBalance">0.00</span></div>
         <button onclick="applyWithdraw()" style="background:#28a745;">Withdraw</button>
     </div>
@@ -53,10 +60,20 @@
 
     <div id="dashboard" class="hidden">
         <div class="card">
-            <h3>Work Stats</h3>
-            <div style="display:flex; justify-content:space-around;">
-                <div><strong>Watch Points</strong><br><span id="points">0</span></div>
-                <div><strong>Subs Approved</strong><br><span id="subCount">0</span></div>
+            <h3>Work Stats (Click to view History)</h3>
+            <div style="display:flex; justify-content:space-between; gap: 10px;">
+                <div class="stat-box" onclick="toggleHistory('watchHistory')">
+                    <strong>Watch</strong><br>Rs <span id="watchPkr">0</span>
+                    <div id="watchHistory" class="history-panel">Loading...</div>
+                </div>
+                <div class="stat-box" onclick="toggleHistory('subHistory')">
+                    <strong>Subs</strong><br>Rs <span id="subPkr">0</span>
+                    <div id="subHistory" class="history-panel">Loading...</div>
+                </div>
+                <div class="stat-box" onclick="toggleHistory('bonusHistory')">
+                    <strong>Bonus</strong><br>Rs <span id="bonusPkr">0</span>
+                    <div id="bonusHistory" class="history-panel">Loading...</div>
+                </div>
             </div>
         </div>
         <h4>Your Tasks</h4>
@@ -102,13 +119,20 @@ const rtdb = firebase.database();
 let currentSlot = "";
 let userDataGlobal = null;
 
+function toggleHistory(id) {
+    const el = document.getElementById(id);
+    const isVisible = el.style.display === "block";
+    document.querySelectorAll('.history-panel').forEach(p => p.style.display = "none");
+    el.style.display = isVisible ? "none" : "block";
+}
+
 function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(error => alert(error.message));
 }
 
 function handleAuth() { auth.signInWithEmailAndPassword(email.value, password.value).catch(() => auth.createUserWithEmailAndPassword(email.value, password.value).then(cred=>{
-    rtdb.ref('users/'+cred.user.uid).set({email: cred.user.email, name: 'User', watch:0, subPoints:0, status:'active'});
+    rtdb.ref('users/'+cred.user.uid).set({email: cred.user.email, name: 'User', watch:0, subPoints:0, status:'active', bonus: 0});
 })); }
 
 auth.onAuthStateChanged(user => {
@@ -116,47 +140,35 @@ auth.onAuthStateChanged(user => {
         authBox.classList.add("hidden"); 
         rtdb.ref('users/' + user.uid).on('value', snap => {
             userDataGlobal = snap.val() || {};
-            
             if(userDataGlobal.status === "disabled") {
-                // Account Disable Logic
-                dashboard.classList.add("hidden");
-                sidebar.classList.add("hidden");
-                disableContent.classList.remove("hidden");
-                if(userDataGlobal.reopenRequest) {
-                    reopenBtn.classList.add("hidden");
-                    reqSentMsg.classList.remove("hidden");
-                }
+                dashboard.classList.add("hidden"); sidebar.classList.add("hidden"); disableContent.classList.remove("hidden");
             } else {
-                // Active Account
-                disableContent.classList.add("hidden");
-                dashboard.classList.remove("hidden");
-                sidebar.classList.remove("hidden");
+                disableContent.classList.add("hidden"); dashboard.classList.remove("hidden"); sidebar.classList.remove("hidden");
                 document.getElementById("displayEmail").innerText = user.email;
                 renderDashboard(user.uid);
             }
         });
     } else { 
-        authBox.classList.remove("hidden"); 
-        dashboard.classList.add("hidden"); 
-        sidebar.classList.add("hidden");
-        disableContent.classList.add("hidden");
+        authBox.classList.remove("hidden"); dashboard.classList.add("hidden"); sidebar.classList.add("hidden"); disableContent.classList.add("hidden");
     }
 });
 
-function sendReopenRequest() {
-    rtdb.ref('users/' + auth.currentUser.uid).update({ reopenRequest: true })
-    .then(() => alert("Request sent successfully!"));
-}
-
 function renderDashboard(uid) {
-    let watchEarn = (userDataGlobal.watch || 0) * 0.38;
-    let subEarn = (userDataGlobal.subPoints || 0) * 0.60;
-    let bonusEarn = (userDataGlobal.bonus || 0);
-    let bal = (watchEarn + subEarn + bonusEarn) - (userDataGlobal.withdrawnAmount || 0);
+    let watchAmt = (userDataGlobal.watch || 0) * 0.38;
+    let subAmt = (userDataGlobal.subPoints || 0) * 0.60;
+    let bonusAmt = (userDataGlobal.bonus || 0);
+    let total = (watchAmt + subAmt + bonusAmt) - (userDataGlobal.withdrawnAmount || 0);
 
-    document.getElementById("points").innerText = userDataGlobal.watch || 0;
-    document.getElementById("subCount").innerText = userDataGlobal.subPoints || 0;
-    document.getElementById("totalBalance").innerText = bal.toFixed(2);
+    document.getElementById("watchPkr").innerText = watchAmt.toFixed(2);
+    document.getElementById("subPkr").innerText = subAmt.toFixed(2);
+    document.getElementById("bonusPkr").innerText = bonusAmt.toFixed(2);
+    document.getElementById("totalBalance").innerText = total.toFixed(2);
+
+    // Render History (Simple logic based on count)
+    document.getElementById("watchHistory").innerHTML = `<div class="history-item"><span>Total Videos:</span> <span>${userDataGlobal.watch || 0}</span></div>`;
+    document.getElementById("subHistory").innerHTML = `<div class="history-item"><span>Approved Subs:</span> <span>${userDataGlobal.subPoints || 0}</span></div>`;
+    document.getElementById("bonusHistory").innerHTML = `<div class="history-item"><span>Daily Bonus:</span> <span>Rs ${bonusAmt.toFixed(2)}</span></div>`;
+
     loadTasks(userDataGlobal.completed || "", userDataGlobal.proofs || {});
 }
 
@@ -178,10 +190,6 @@ async function loadTasks(compStr, proofsObj) {
         }
     });
     list.innerHTML = html || "No tasks available!";
-}
-
-function applyWithdraw() {
-    alert("Withdrawal logic active as per your previous rules.");
 }
 
 function openLinkBox(link, cid) { window.open(link, '_blank'); currentSlot = cid; document.getElementById("linkPopup").style.display = "flex"; }
@@ -210,7 +218,11 @@ function startT() {
 function saveWatch() {
     rtdb.ref('users/' + auth.currentUser.uid).once('value', s => {
         const d = s.val() || {};
-        rtdb.ref('users/' + auth.currentUser.uid).update({ watch: (d.watch || 0) + 1, completed: (d.completed || "") + "," + currentSlot });
+        rtdb.ref('users/' + auth.currentUser.uid).update({ 
+            watch: (d.watch || 0) + 1, 
+            completed: (d.completed || "") + "," + currentSlot,
+            lastWatch: new Date().toLocaleString() 
+        });
         document.getElementById("videoPopup").style.display = "none"; player.stopVideo();
     });
 }
