@@ -14,6 +14,8 @@
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; border: none; background: #1976d2; color: white; }
+        /* Gmail Button Style */
+        .google-btn { background: #4285F4; margin-bottom: 15px; } 
         .video-item { background: white; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #1976d2; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
         .hidden { display: none; }
@@ -23,6 +25,8 @@
 <div class="container">
     <div id="authBox" class="card">
         <h2>Smart Earn</h2>
+        <button class="google-btn" onclick="loginWithGoogle()">Login with Gmail</button>
+        <p style="color:gray; font-size:12px;">-- OR --</p>
         <input id="email" placeholder="Email">
         <input id="password" type="password" placeholder="Password">
         <button onclick="handleAuth()">Login / Register</button>
@@ -54,6 +58,7 @@
 <div class="popup" id="videoPopup"><div id="timerDisplay" style="color:#ffeb3b; font-size:24px; margin-bottom:10px;">18s</div><div id="player"></div></div>
 
 <script>
+// Firebase configuration from your file
 const firebaseConfig = {
   apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ",
   authDomain: "own-live-steam-web.firebaseapp.com",
@@ -69,6 +74,12 @@ const rtdb = firebase.database();
 
 let currentSlot = "";
 
+// Naya Gmail Login Function
+function loginWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(error => alert(error.message));
+}
+
 function handleAuth() { auth.signInWithEmailAndPassword(email.value, password.value).catch(() => auth.createUserWithEmailAndPassword(email.value, password.value)); }
 
 auth.onAuthStateChanged(user => {
@@ -83,11 +94,10 @@ auth.onAuthStateChanged(user => {
     } else { authBox.classList.remove("hidden"); dashboard.classList.add("hidden"); }
 });
 
+// Load tasks and other logic same as your index.html
 async function loadTasks(compStr, proofsObj) {
     const list = document.getElementById("taskList");
     let html = "";
-
-    // Load Videos
     const vSnap = await db.collection("videos").get();
     vSnap.forEach(doc => {
         const v = doc.data(); const sid = "slot" + v.slot;
@@ -95,17 +105,13 @@ async function loadTasks(compStr, proofsObj) {
             html += `<div class="video-item"><span>Video Task ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
         }
     });
-
-    // Load Channels
     const cSnap = await db.collection("channels").get();
     cSnap.forEach(doc => {
         const c = doc.data(); const cid = "chan" + c.slot;
-        // Task tabhi dikhayen agar na approve hua ho (compStr) aur na hi link submit hua ho (proofsObj)
         if(c.enabled && !compStr.includes(cid) && !proofsObj[cid]) {
             html += `<div class="video-item" style="border-left:5px solid #28a745"><span>Sub Task ${c.slot}</span><button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#28a745">Subscribe</button></div>`;
         }
     });
-
     list.innerHTML = html || "No tasks available right now!";
 }
 
@@ -114,8 +120,6 @@ function openLinkBox(link, cid) { window.open(link, '_blank'); currentSlot = cid
 function submitManualLink() {
     const linkVal = document.getElementById("proofLink").value;
     if(!linkVal.includes("http")) return alert("Please enter a valid link!");
-    
-    // User ke "proofs" section mein link save karna
     rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(linkVal).then(() => {
         alert("Your points will be added in next 24 hours. You can continue");
         document.getElementById("linkPopup").style.display = "none";
@@ -123,7 +127,6 @@ function submitManualLink() {
     });
 }
 
-// Video Logic
 let player, vTime, watchTimer;
 function playVideo(url, sid) {
     currentSlot = sid; vTime = 18; document.getElementById("videoPopup").style.display = "flex";
