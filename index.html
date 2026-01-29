@@ -1,151 +1,144 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
     <title>User Dashboard</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f0f2f5; }
-        .container { max-width: 450px; margin: 20px auto; padding: 15px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; border: none; background: #1976d2; color: white; }
-        /* Gmail Button Style */
-        .google-btn { background: #4285F4; margin-bottom: 15px; } 
-        .video-item { background: white; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #1976d2; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
-        .hidden { display: none; }
+        body{margin:0; font-family: sans-serif; display: flex; background: #f4f7f6;}
+        #sidebar { width: 250px; background: #000; color: #fff; height: 100vh; padding: 20px; position: fixed;}
+        #main-content { margin-left: 290px; padding: 20px; width: 100%; }
+        .stat-card { background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;}
+        input { width: 100%; padding: 8px; margin: 10px 0; box-sizing: border-box; }
+        button { background: #28a745; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 5px; }
+        .withdraw-btn { background: #007bff; width: 100%; font-weight: bold; }
     </style>
 </head>
 <body>
-<div class="container">
-    <div id="authBox" class="card">
-        <h2>Smart Earn</h2>
-        <button class="google-btn" onclick="loginWithGoogle()">Login with Gmail</button>
-        <p style="color:gray; font-size:12px;">-- OR --</p>
-        <input id="email" placeholder="Email">
-        <input id="password" type="password" placeholder="Password">
-        <button onclick="handleAuth()">Login / Register</button>
-    </div>
 
-    <div id="dashboard" class="hidden">
-        <div class="card">
-            <div style="display:flex; justify-content:space-around;">
-                <div><strong>Watch Points</strong><br><span id="points">0</span></div>
-                <div><strong>Subs Approved</strong><br><span id="subCount">0</span></div>
-            </div>
-        </div>
-        <h4>Your Tasks</h4>
-        <div id="taskList">Loading tasks...</div>
-        <button onclick="auth.signOut()" style="background:#d32f2f; margin-top:20px;">Logout</button>
-    </div>
+<div id="sidebar">
+    <h3>Profile Details</h3>
+    <p>Name: <span id="sideName">Loading...</span></p>
+    <p>Email: <span id="sideEmail">...</span></p>
+    <hr>
+    <h4>Update Password</h4>
+    <input type="password" id="newPass" placeholder="New Password">
+    <button onclick="changePassword()">Update Pass</button>
+    <br><br>
+    <button onclick="firebase.auth().signOut()" style="background:red">Logout</button>
 </div>
 
-<div class="popup" id="linkPopup">
-    <div class="card" style="width:90%">
-        <h4>Submit Proof Link</h4>
-        <p style="font-size:12px; color:#555;">Upload screenshot to <b>imgbb.com</b> and paste link:</p>
-        <input type="text" id="proofLink" placeholder="https://ibb.co/xxxxx">
-        <button onclick="submitManualLink()" style="background:#28a745;">Submit For Review</button>
-        <button onclick="linkPopup.style.display='none'" style="background:#888;">Cancel</button>
+<div id="main-content">
+    <div class="stat-card">
+        <h2>Your Wallet</h2>
+        <p>Watch Earnings (Rs. 0.38/pt): <strong>Rs. <span id="watchMoney">0</span></strong></p>
+        <p>Subscribe Earnings (Rs. 0.60/pt): <strong>Rs. <span id="subMoney">0</span></strong></p>
+        <p>Daily Bonus: <strong>Rs. <span id="bonusMoney">0</span></strong></p>
+        <hr>
+        <h3>Available Balance: Rs. <span id="totalBalance">0</span></h3>
+        <button class="withdraw-btn" onclick="handleWithdraw()">Withdraw Money</button>
+        <p id="withdrawMsg" style="color: blue; font-size: 12px;"></p>
     </div>
 </div>
-
-<div class="popup" id="videoPopup"><div id="timerDisplay" style="color:#ffeb3b; font-size:24px; margin-bottom:10px;">18s</div><div id="player"></div></div>
 
 <script>
-// Firebase configuration from your file
+// Same Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ",
   authDomain: "own-live-steam-web.firebaseapp.com",
   projectId: "own-live-steam-web",
   databaseURL: "https://own-live-steam-web-default-rtdb.firebaseio.com",
-  messagingSenderId: "132045886996",
-  appId: "1:132045886996:web:8a6d937c3548afd2477901"
 };
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
 const rtdb = firebase.database();
+const auth = firebase.auth();
 
-let currentSlot = "";
-
-// Naya Gmail Login Function
-function loginWithGoogle() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(error => alert(error.message));
-}
-
-function handleAuth() { auth.signInWithEmailAndPassword(email.value, password.value).catch(() => auth.createUserWithEmailAndPassword(email.value, password.value)); }
+let currentUserData = null;
 
 auth.onAuthStateChanged(user => {
-    if(user){
-        authBox.classList.add("hidden"); dashboard.classList.remove("hidden");
+    if(user) {
         rtdb.ref('users/' + user.uid).on('value', snap => {
-            const data = snap.val() || {watch: 0, subPoints: 0};
-            document.getElementById("points").innerText = (data.watch || 0) + (data.subPoints || 0);
-            document.getElementById("subCount").innerText = data.subPoints || 0;
-            loadTasks(data.completed || "", data.proofs || {});
+            const u = snap.val();
+            currentUserData = u;
+            updateUI(u);
+            checkDailyBonus(user.uid, u);
         });
-    } else { authBox.classList.remove("hidden"); dashboard.classList.add("hidden"); }
+    } else {
+        window.location.href = "login.html"; // Replace with your login page
+    }
 });
 
-// Load tasks and other logic same as your index.html
-async function loadTasks(compStr, proofsObj) {
-    const list = document.getElementById("taskList");
-    let html = "";
-    const vSnap = await db.collection("videos").get();
-    vSnap.forEach(doc => {
-        const v = doc.data(); const sid = "slot" + v.slot;
-        if(v.enabled && !compStr.includes(sid)) {
-            html += `<div class="video-item"><span>Video Task ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
-        }
-    });
-    const cSnap = await db.collection("channels").get();
-    cSnap.forEach(doc => {
-        const c = doc.data(); const cid = "chan" + c.slot;
-        if(c.enabled && !compStr.includes(cid) && !proofsObj[cid]) {
-            html += `<div class="video-item" style="border-left:5px solid #28a745"><span>Sub Task ${c.slot}</span><button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#28a745">Subscribe</button></div>`;
-        }
-    });
-    list.innerHTML = html || "No tasks available right now!";
+function updateUI(u) {
+    document.getElementById("sideName").innerText = u.name || "User";
+    document.getElementById("sideEmail").innerText = u.email;
+    
+    let wMoney = (u.watch || 0) * 0.38;
+    let sMoney = (u.subPoints || 0) * 0.60;
+    let bonus = (u.bonus || 0);
+    let total = (wMoney + sMoney + bonus) - (u.withdrawnAmount || 0);
+
+    document.getElementById("watchMoney").innerText = wMoney.toFixed(2);
+    document.getElementById("subMoney").innerText = sMoney.toFixed(2);
+    document.getElementById("bonusMoney").innerText = bonus.toFixed(2);
+    document.getElementById("totalBalance").innerText = total.toFixed(2);
 }
 
-function openLinkBox(link, cid) { window.open(link, '_blank'); currentSlot = cid; document.getElementById("linkPopup").style.display = "flex"; }
+function checkDailyBonus(uid, u) {
+    const today = new Date().toDateString();
+    if(u.lastLogin !== today) {
+        rtdb.ref('users/' + uid).update({
+            bonus: (u.bonus || 0) + 0.5,
+            lastLogin: today
+        });
+    }
+}
 
-function submitManualLink() {
-    const linkVal = document.getElementById("proofLink").value;
-    if(!linkVal.includes("http")) return alert("Please enter a valid link!");
-    rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(linkVal).then(() => {
-        alert("Your points will be added in next 24 hours. You can continue");
-        document.getElementById("linkPopup").style.display = "none";
-        document.getElementById("proofLink").value = "";
+function handleWithdraw() {
+    const u = currentUserData;
+    const uid = auth.currentUser.uid;
+    let wMoney = (u.watch || 0) * 0.38;
+    let sMoney = (u.subPoints || 0) * 0.60;
+    let bonus = (u.bonus || 0);
+    let balance = (wMoney + sMoney + bonus) - (u.withdrawnAmount || 0);
+
+    let count = u.withdrawCount || 0;
+    let limit = 300;
+    if(count === 1) limit = 500;
+    if(count >= 2) limit = 1000;
+
+    if(balance < limit) {
+        alert("Aapka balance " + limit + " se kam hai.");
+        return;
+    }
+
+    let payout = balance;
+    // Rule 6: 1000 balance bonus on 1st withdraw
+    if(balance >= 1000 && count === 0) payout += 100;
+
+    const req = {
+        uid: uid,
+        email: u.email,
+        amount: balance,
+        payout: payout,
+        status: "pending"
+    };
+
+    rtdb.ref('withdrawRequests').push(req);
+    rtdb.ref('users/' + uid).update({
+        withdrawnAmount: (u.withdrawnAmount || 0) + balance,
+        withdrawCount: count + 1
+    }).then(() => {
+        document.getElementById("withdrawMsg").innerText = "Request Sent! Please wait 24 hours for approval.";
+        alert("Withdraw request lag gayi hai!");
     });
 }
 
-let player, vTime, watchTimer;
-function playVideo(url, sid) {
-    currentSlot = sid; vTime = 18; document.getElementById("videoPopup").style.display = "flex";
-    const vidId = url.split('v=')[1]?.split('&')[0];
-    if(player) player.loadVideoById(vidId);
-    else player = new YT.Player('player', { height:'250', width:'100%', videoId:vidId, events:{'onStateChange':e=>{if(e.data==1)startT();else clearInterval(watchTimer);}}});
-}
-function startT() {
-    clearInterval(watchTimer); watchTimer = setInterval(() => {
-        vTime--; document.getElementById("timerDisplay").innerText = vTime + "s";
-        if(vTime <= 0) { clearInterval(watchTimer); saveWatch(); }
-    }, 1000);
-}
-function saveWatch() {
-    rtdb.ref('users/' + auth.currentUser.uid).once('value', s => {
-        const d = s.val() || {};
-        rtdb.ref('users/' + auth.currentUser.uid).update({ watch: (d.watch || 0) + 1, completed: (d.completed || "") + "," + currentSlot });
-        document.getElementById("videoPopup").style.display = "none"; player.stopVideo();
-    });
+function changePassword() {
+    const p = document.getElementById("newPass").value;
+    if(p.length < 6) { alert("Min 6 chars"); return; }
+    auth.currentUser.updatePassword(p).then(() => alert("Password Updated!"));
 }
 </script>
 </body>
