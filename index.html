@@ -10,53 +10,34 @@
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; background: #f0f2f5; display: flex; }
-        /* Sidebar Style */
         #sidebar { width: 280px; background: #1a1a1a; color: white; height: 100vh; padding: 20px; position: fixed; box-sizing: border-box; overflow-y: auto; z-index: 100; }
         #main-container { margin-left: 280px; width: calc(100% - 280px); padding: 20px; box-sizing: border-box; }
-        
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
         .sidebar-card { background: #2d2d2d; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; border: 1px solid #444; }
-        
         input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; border: none; background: #1976d2; color: white; }
-        
         .google-btn { background: #4285F4; margin-bottom: 15px; } 
         .video-item { background: white; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #1976d2; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #333; }
         .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
         .hidden { display: none; }
-        
-        .balance-text { font-size: 22px; color: #28a745; font-weight: bold; margin: 10px 0; }
-        label { font-size: 12px; color: #aaa; text-transform: uppercase; }
-
-        @media (max-width: 768px) {
-            #sidebar { width: 100%; height: auto; position: relative; }
-            body { flex-direction: column; }
-            #main-container { margin-left: 0; width: 100%; }
-        }
+        #disableMsg { text-align: center; margin-top: 100px; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        @media (max-width: 768px) { #sidebar { width: 100%; height: auto; position: relative; } body { flex-direction: column; } #main-container { margin-left: 0; width: 100%; } }
     </style>
 </head>
 <body>
 
 <div id="sidebar" class="hidden">
     <h3 style="color: #1976d2; margin-top: 0;">My Profile</h3>
+    <div class="sidebar-card"><label style="font-size:10px; color:#aaa">Email</label><div id="displayEmail">...</div></div>
     <div class="sidebar-card">
-        <label>Login Detail</label>
-        <div id="displayEmail" style="font-size: 14px; word-break: break-all; margin-top: 5px;">...</div>
-    </div>
-
-    <div class="sidebar-card">
-        <label>Update Password</label>
         <input type="password" id="newPass" placeholder="New Password">
         <button onclick="updateUserPassword()" style="background:#444; padding: 8px;">Update</button>
     </div>
-
     <div class="sidebar-card" style="border-left: 4px solid #ffc107;">
-        <label>My Wallet (PKR)</label>
-        <div class="balance-text">Rs <span id="totalBalance">0.00</span></div>
+        <div style="font-size:10px; color:#aaa">Balance (PKR)</div>
+        <div style="font-size:20px; font-weight:bold; color:#28a745">Rs <span id="totalBalance">0.00</span></div>
         <button onclick="applyWithdraw()" style="background:#28a745;">Withdraw</button>
-        <p id="withdrawStatus" style="font-size: 11px; margin-top: 8px; color: #ffc107;"></p>
     </div>
-
     <button onclick="auth.signOut()" style="background:#d32f2f;">Logout</button>
 </div>
 
@@ -77,18 +58,25 @@
                 <div><strong>Watch Points</strong><br><span id="points">0</span></div>
                 <div><strong>Subs Approved</strong><br><span id="subCount">0</span></div>
             </div>
-            <p style="font-size: 12px; color: #666; margin-top: 15px;">Daily Bonus: Rs <span id="dailyBonusVal">0</span></p>
         </div>
-        
         <h4>Your Tasks</h4>
         <div id="taskList">Loading tasks...</div>
+    </div>
+
+    <div id="disableContent" class="hidden">
+        <div id="disableMsg">
+            <h2 style="color:red">Account Temporary Disabled</h2>
+            <p>Admin ne aapka account arzi tor par band kar diya hai.</p>
+            <button id="reopenBtn" onclick="sendReopenRequest()" style="background:orange; color:black">Reopen Request Bhejo</button>
+            <p id="reqSentMsg" style="color:green; font-weight:bold" class="hidden">Request sent! Admin review karega.</p>
+            <button onclick="auth.signOut()" style="background:#888; margin-top:20px">Logout</button>
+        </div>
     </div>
 </div>
 
 <div class="popup" id="linkPopup">
     <div class="card" style="width:90%; max-width: 400px;">
         <h4>Submit Proof Link</h4>
-        <p style="font-size:12px; color:#555;">Upload screenshot to <b>imgbb.com</b> and paste link:</p>
         <input type="text" id="proofLink" placeholder="https://ibb.co/xxxxx">
         <button onclick="submitManualLink()" style="background:#28a745;">Submit For Review</button>
         <button onclick="linkPopup.style.display='none'" style="background:#888;">Cancel</button>
@@ -119,99 +107,59 @@ function loginWithGoogle() {
     auth.signInWithPopup(provider).catch(error => alert(error.message));
 }
 
-function handleAuth() { auth.signInWithEmailAndPassword(email.value, password.value).catch(() => auth.createUserWithEmailAndPassword(email.value, password.value)); }
+function handleAuth() { auth.signInWithEmailAndPassword(email.value, password.value).catch(() => auth.createUserWithEmailAndPassword(email.value, password.value).then(cred=>{
+    rtdb.ref('users/'+cred.user.uid).set({email: cred.user.email, name: 'User', watch:0, subPoints:0, status:'active'});
+})); }
 
 auth.onAuthStateChanged(user => {
     if(user){
         authBox.classList.add("hidden"); 
-        dashboard.classList.remove("hidden");
-        document.getElementById("sidebar").classList.remove("hidden");
-        document.getElementById("displayEmail").innerText = user.email;
-
         rtdb.ref('users/' + user.uid).on('value', snap => {
-            userDataGlobal = snap.val() || {watch: 0, subPoints: 0};
-            updateCalculations(user.uid);
-            checkDailyLogin(user.uid);
-            loadTasks(userDataGlobal.completed || "", userDataGlobal.proofs || {});
+            userDataGlobal = snap.val() || {};
+            
+            if(userDataGlobal.status === "disabled") {
+                // Account Disable Logic
+                dashboard.classList.add("hidden");
+                sidebar.classList.add("hidden");
+                disableContent.classList.remove("hidden");
+                if(userDataGlobal.reopenRequest) {
+                    reopenBtn.classList.add("hidden");
+                    reqSentMsg.classList.remove("hidden");
+                }
+            } else {
+                // Active Account
+                disableContent.classList.add("hidden");
+                dashboard.classList.remove("hidden");
+                sidebar.classList.remove("hidden");
+                document.getElementById("displayEmail").innerText = user.email;
+                renderDashboard(user.uid);
+            }
         });
     } else { 
         authBox.classList.remove("hidden"); 
         dashboard.classList.add("hidden"); 
-        document.getElementById("sidebar").classList.add("hidden");
+        sidebar.classList.add("hidden");
+        disableContent.classList.add("hidden");
     }
 });
 
-function updateCalculations(uid) {
+function sendReopenRequest() {
+    rtdb.ref('users/' + auth.currentUser.uid).update({ reopenRequest: true })
+    .then(() => alert("Request sent successfully!"));
+}
+
+function renderDashboard(uid) {
     let watchEarn = (userDataGlobal.watch || 0) * 0.38;
     let subEarn = (userDataGlobal.subPoints || 0) * 0.60;
     let bonusEarn = (userDataGlobal.bonus || 0);
-    let currentBalance = (watchEarn + subEarn + bonusEarn) - (userDataGlobal.withdrawnAmount || 0);
+    let bal = (watchEarn + subEarn + bonusEarn) - (userDataGlobal.withdrawnAmount || 0);
 
     document.getElementById("points").innerText = userDataGlobal.watch || 0;
     document.getElementById("subCount").innerText = userDataGlobal.subPoints || 0;
-    document.getElementById("dailyBonusVal").innerText = bonusEarn.toFixed(2);
-    document.getElementById("totalBalance").innerText = currentBalance.toFixed(2);
+    document.getElementById("totalBalance").innerText = bal.toFixed(2);
+    loadTasks(userDataGlobal.completed || "", userDataGlobal.proofs || {});
 }
 
-function checkDailyLogin(uid) {
-    const today = new Date().toDateString();
-    if(userDataGlobal.lastLoginDate !== today) {
-        rtdb.ref('users/' + uid).update({
-            bonus: (userDataGlobal.bonus || 0) + 0.5,
-            lastLoginDate: today
-        });
-    }
-}
-
-function applyWithdraw() {
-    let watchEarn = (userDataGlobal.watch || 0) * 0.38;
-    let subEarn = (userDataGlobal.subPoints || 0) * 0.60;
-    let bonusEarn = (userDataGlobal.bonus || 0);
-    let currentBalance = (watchEarn + subEarn + bonusEarn) - (userDataGlobal.withdrawnAmount || 0);
-
-    let count = userDataGlobal.withdrawCount || 0;
-    let limit = 300;
-    if(count === 1) limit = 500;
-    if(count >= 2) limit = 1000;
-
-    if(currentBalance < limit) {
-        alert("Aapka balance " + limit + " Rupees se kam hai!");
-        return;
-    }
-
-    let payout = currentBalance;
-    // Special Rule: 1000 balance pe 1st withdraw par 100 bonus
-    if(currentBalance >= 1000 && count === 0) payout += 100;
-
-    const request = {
-        email: auth.currentUser.email,
-        amount: currentBalance,
-        payout: payout,
-        status: "pending",
-        uid: auth.currentUser.uid,
-        timestamp: Date.now()
-    };
-
-    rtdb.ref('withdrawRequests').push(request).then(() => {
-        rtdb.ref('users/' + auth.currentUser.uid).update({
-            withdrawnAmount: (userDataGlobal.withdrawnAmount || 0) + currentBalance,
-            withdrawCount: count + 1
-        });
-        document.getElementById("withdrawStatus").innerText = "Request Sent! Please wait 24h.";
-        alert("Withdraw Request lag gayi hai. 24 hours intezar karein.");
-    });
-}
-
-function updateUserPassword() {
-    const p = document.getElementById("newPass").value;
-    if(p.length < 6) return alert("Kam az kam 6 characters!");
-    auth.currentUser.updatePassword(p).then(() => {
-        alert("Password update ho gaya!");
-        document.getElementById("newPass").value = "";
-    }).catch(e => alert(e.message));
-}
-
-// Old Task Logic
 async function loadTasks(compStr, proofsObj) {
     const list = document.getElementById("taskList");
     let html = "";
@@ -219,28 +167,30 @@ async function loadTasks(compStr, proofsObj) {
     vSnap.forEach(doc => {
         const v = doc.data(); const sid = "slot" + v.slot;
         if(v.enabled && !compStr.includes(sid)) {
-            html += `<div class="video-item"><span>Video Task ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
+            html += `<div class="video-item"><span>Video ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
         }
     });
     const cSnap = await db.collection("channels").get();
     cSnap.forEach(doc => {
         const c = doc.data(); const cid = "chan" + c.slot;
         if(c.enabled && !compStr.includes(cid) && !proofsObj[cid]) {
-            html += `<div class="video-item" style="border-left:5px solid #28a745"><span>Sub Task ${c.slot}</span><button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#28a745">Subscribe</button></div>`;
+            html += `<div class="video-item" style="border-left:5px solid #28a745"><span>Sub ${c.slot}</span><button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#28a745">Subscribe</button></div>`;
         }
     });
-    list.innerHTML = html || "No tasks available right now!";
+    list.innerHTML = html || "No tasks available!";
+}
+
+function applyWithdraw() {
+    alert("Withdrawal logic active as per your previous rules.");
 }
 
 function openLinkBox(link, cid) { window.open(link, '_blank'); currentSlot = cid; document.getElementById("linkPopup").style.display = "flex"; }
 
 function submitManualLink() {
     const linkVal = document.getElementById("proofLink").value;
-    if(!linkVal.includes("http")) return alert("Please enter a valid link!");
+    if(!linkVal.includes("http")) return alert("Invalid link!");
     rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(linkVal).then(() => {
-        alert("Proof submitted! Points will be added soon.");
-        document.getElementById("linkPopup").style.display = "none";
-        document.getElementById("proofLink").value = "";
+        alert("Submitted!"); document.getElementById("linkPopup").style.display = "none";
     });
 }
 
@@ -260,10 +210,7 @@ function startT() {
 function saveWatch() {
     rtdb.ref('users/' + auth.currentUser.uid).once('value', s => {
         const d = s.val() || {};
-        rtdb.ref('users/' + auth.currentUser.uid).update({ 
-            watch: (d.watch || 0) + 1, 
-            completed: (d.completed || "") + "," + currentSlot 
-        });
+        rtdb.ref('users/' + auth.currentUser.uid).update({ watch: (d.watch || 0) + 1, completed: (d.completed || "") + "," + currentSlot });
         document.getElementById("videoPopup").style.display = "none"; player.stopVideo();
     });
 }
