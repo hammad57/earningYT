@@ -51,7 +51,7 @@
         .card { background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-bottom: 20px; border: 1px solid #334155; }
         .top-bar { background: #1e293b; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; }
         
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; box-sizing: border-box; }
         button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; background: var(--primary); color: white; }
         
         .video-item { background: #1e293b; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary); }
@@ -150,9 +150,9 @@
         <div class="card">
             <h3>Earnings Statistics</h3>
             <div style="display:flex; justify-content:space-between; gap: 10px;">
-                <div class="stat-box" onclick="toggleHistory('watchHistory')"><strong>Watch</strong><br>Rs <span id="watchPkr">0</span></div>
-                <div class="stat-box" onclick="toggleHistory('subHistory')"><strong>Subs</strong><br>Rs <span id="subPkr">0</span></div>
-                <div class="stat-box" onclick="toggleHistory('bonusHistory')"><strong>Bonus</strong><br>Rs <span id="bonusPkr">0</span></div>
+                <div class="stat-box"><strong>Watch</strong><br>Rs <span id="watchPkr">0</span></div>
+                <div class="stat-box"><strong>Subs</strong><br>Rs <span id="subPkr">0</span></div>
+                <div class="stat-box"><strong>Bonus</strong><br>Rs <span id="bonusPkr">0</span></div>
             </div>
         </div>
 
@@ -166,6 +166,30 @@
 
         <h4>Subscription & Video Tasks</h4>
         <div id="taskList">Loading tasks...</div>
+    </div>
+</div>
+
+<div class="popup" id="withdrawPopup">
+    <div class="card" style="width:90%; max-width: 400px; position: relative;">
+        <h3 style="margin:0 0 15px 0; color:#60a5fa; text-align:center;">Withdraw Funds</h3>
+        
+        <label style="font-size: 12px; color:#aaa;">Select Payment Method</label>
+        <select id="wMethod">
+            <option value="Easypaisa">Easypaisa</option>
+            <option value="JazzCash">JazzCash</option>
+            <option value="NayaPay">NayaPay</option>
+            <option value="Zindagi">Zindagi</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+
+        <input type="text" id="wNumber" placeholder="Enter Account Number">
+        <input type="number" id="wAmount" placeholder="Enter Withdrawal Amount">
+        <input type="text" id="wName" placeholder="Type your name as per account">
+        
+        <p style="font-size:11px; color:#ef4444; margin-bottom:15px; text-align:center;">Minimum Withdrawal: Rs 100</p>
+        
+        <button onclick="submitWithdrawRequest()" style="background:#28a745;">Submit Withdrawal</button>
+        <button onclick="document.getElementById('withdrawPopup').style.display='none'" style="background:none; color:#aaa; margin-top:10px;">Close</button>
     </div>
 </div>
 
@@ -199,7 +223,6 @@ let currentSlot = "";
 let userDataGlobal = null;
 let currentTotalBalance = 0;
 
-// URL Referral Detection
 const urlParams = new URLSearchParams(window.location.search);
 const referrerId = urlParams.get('ref');
 
@@ -229,15 +252,12 @@ function handleRegister() {
     const name = document.getElementById("rName").value;
     const email = document.getElementById("rEmail").value;
     const pass = document.getElementById("rPass").value;
-    
     if(!name || !email || pass.length < 6) return alert("All fields are required!");
-
     auth.createUserWithEmailAndPassword(email, pass).then(cred => {
         const uid = cred.user.uid;
         rtdb.ref('users/' + uid).set({
             email: email, name: name, watch: 0, subPoints: 0, status: 'active', bonus: 0, withdrawnAmount: 0, referralCount: 0
         }).then(() => {
-            // Processing Referral Reward
             if (referrerId && referrerId !== uid) {
                 const refPath = rtdb.ref('users/' + referrerId);
                 refPath.once('value', snapshot => {
@@ -245,10 +265,7 @@ function handleRegister() {
                     if (refData && (refData.referralCount || 0) < 4) {
                         let newCount = (refData.referralCount || 0) + 1;
                         let reward = newCount <= 3 ? 5 : 10;
-                        refPath.update({
-                            referralCount: newCount,
-                            bonus: (refData.bonus || 0) + reward
-                        });
+                        refPath.update({ referralCount: newCount, bonus: (refData.bonus || 0) + reward });
                     }
                 });
             }
@@ -269,12 +286,9 @@ auth.onAuthStateChanged(user => {
             userDataGlobal = snap.val() || {};
             document.getElementById("dashboard").classList.remove("hidden");
             document.getElementById("displayEmail").innerText = user.email;
-            
-            // Referral UI Update
             const myRefLink = window.location.origin + window.location.pathname + "?ref=" + user.uid;
             document.getElementById("refLinkDisplay").innerText = myRefLink;
             document.getElementById("refCountText").innerText = (userDataGlobal.referralCount || 0) + "/4";
-            
             renderDashboard();
         });
     } else { 
@@ -288,13 +302,11 @@ function renderDashboard() {
     let subAmt = (userDataGlobal.subPoints || 0) * 0.60;
     let bonusAmt = (userDataGlobal.bonus || 0);
     currentTotalBalance = (watchAmt + subAmt + bonusAmt) - (userDataGlobal.withdrawnAmount || 0);
-
     document.getElementById("watchPkr").innerText = watchAmt.toFixed(2);
     document.getElementById("subPkr").innerText = subAmt.toFixed(2);
     document.getElementById("bonusPkr").innerText = bonusAmt.toFixed(2);
     document.getElementById("totalBalance").innerText = currentTotalBalance.toFixed(2);
     document.getElementById("userBalanceHead").innerText = "Rs " + currentTotalBalance.toFixed(2);
-    
     loadTasks();
 }
 
@@ -303,8 +315,6 @@ async function loadTasks() {
     const proofsObj = userDataGlobal.proofs || {};
     const list = document.getElementById("taskList");
     let html = "";
-    
-    // Youtube Subs Tasks (Restored)
     const cSnap = await db.collection("channels").get();
     cSnap.forEach(doc => {
         const c = doc.data(); const cid = "chan" + c.slot;
@@ -312,8 +322,6 @@ async function loadTasks() {
             html += `<div class="video-item" style="border-left:5px solid #28a745"><span>Sub Task ${c.slot}</span><button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#28a745">Subscribe</button></div>`;
         }
     });
-
-    // Video Tasks
     const vSnap = await db.collection("videos").get();
     vSnap.forEach(doc => {
         const v = doc.data(); const sid = "slot" + v.slot;
@@ -321,7 +329,6 @@ async function loadTasks() {
             html += `<div class="video-item"><span>Video Task ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
         }
     });
-    
     list.innerHTML = html || "No tasks available right now!";
 }
 
@@ -330,22 +337,42 @@ function copyRefLink() {
     navigator.clipboard.writeText(link).then(() => alert("Referral link copied!"));
 }
 
+// Withdrawal Logic Updates
 function applyWithdraw() {
     if(currentTotalBalance < 100) return alert("Minimum withdrawal Rs 100!");
-    const info = prompt("Enter JazzCash/EasyPaisa details:");
-    if(!info) return;
+    document.getElementById("withdrawPopup").style.display = "flex";
+    document.getElementById("wAmount").value = currentTotalBalance.toFixed(2);
+}
+
+function submitWithdrawRequest() {
+    const method = document.getElementById("wMethod").value;
+    const number = document.getElementById("wNumber").value;
+    const amount = parseFloat(document.getElementById("wAmount").value);
+    const name = document.getElementById("wName").value;
+
+    if(!number || !amount || !name) return alert("Tamam maloomat darj karein!");
+    if(amount > currentTotalBalance) return alert("Aapka balance kam hai!");
+    if(amount < 100) return alert("Minimum Rs 100 withdraw kar sakte hain!");
+
+    const fullDetails = `Method: ${method} | Acc: ${number} | Name: ${name}`;
     const reqId = Date.now();
+
     rtdb.ref('withdrawRequests/' + reqId).set({
-        uid: auth.currentUser.uid, email: auth.currentUser.email,
-        amount: currentTotalBalance, details: info, status: 'pending'
+        uid: auth.currentUser.uid, 
+        email: auth.currentUser.email,
+        amount: amount, 
+        details: fullDetails, 
+        status: 'pending'
     }).then(() => {
-        rtdb.ref('users/' + auth.currentUser.uid).update({ withdrawnAmount: (userDataGlobal.withdrawnAmount || 0) + currentTotalBalance });
-        alert("Withdrawal request submitted!");
+        rtdb.ref('users/' + auth.currentUser.uid).update({ 
+            withdrawnAmount: (userDataGlobal.withdrawnAmount || 0) + amount 
+        });
+        document.getElementById("withdrawPopup").style.display = "none";
+        alert("Withdrawal request submitted successfully!");
     });
 }
 
 function openLinkBox(link, cid) { window.open(link, '_blank'); currentSlot = cid; document.getElementById("linkPopup").style.display = "flex"; }
-
 function submitManualLink() {
     const val = document.getElementById("proofLink").value;
     if(!val.includes("http")) return alert("Invalid link!");
@@ -377,4 +404,3 @@ function saveWatch() {
 </script>
 </body>
 </html>
-
