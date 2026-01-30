@@ -160,6 +160,8 @@
                 <div class="stat-box"><strong>Bonus</strong><br>Rs <span id="bonusPkr">0</span></div>
             </div>
         </div>
+        
+        <h4 style="margin-top:30px; border-bottom:1px solid #334155; padding-bottom:10px">Available Tasks</h4>
         <div id="taskList">Loading tasks...</div>
     </div>
 </div>
@@ -185,6 +187,16 @@
         
         <button onclick="submitWithdrawRequest()" style="background:#28a745; margin-bottom:10px;">Submit Withdrawal</button>
         <button onclick="document.getElementById('withdrawPopup').style.display='none'" style="background:none; color:#aaa;">Close</button>
+    </div>
+</div>
+
+<div class="popup" id="linkPopup">
+    <div class="card" style="width:90%; max-width: 400px;">
+        <h4 style="margin:0 0 10px 0">Submit Proof Link</h4>
+        <p style="font-size:12px; color:#aaa">Upload screenshot on ibb.co and paste link here.</p>
+        <input type="text" id="proofLink" placeholder="https://ibb.co/xxxxx">
+        <button onclick="submitManualLink()" style="background:#28a745; margin-bottom:10px;">Submit For Review</button>
+        <button onclick="document.getElementById('linkPopup').style.display='none'" style="background:none; color:#aaa">Cancel</button>
     </div>
 </div>
 
@@ -267,7 +279,7 @@ auth.onAuthStateChanged(user => {
         rtdb.ref('users/' + user.uid).on('value', snap => {
             userDataGlobal = snap.val() || {};
 
-            // SECURITY CHECK: If admin disabled the user, force logout
+            // SECURITY CHECK
             if(userDataGlobal.status === "disabled") {
                 auth.signOut();
                 alert("Your account has been suspended by Admin!");
@@ -300,12 +312,26 @@ function renderDashboard() {
     loadTasks();
 }
 
-// Task Loading Logic
+// Task Loading Logic (Updated to Include Channels)
 async function loadTasks() {
     const compStr = userDataGlobal.completed || "";
+    const proofsObj = userDataGlobal.proofs || {};
     const list = document.getElementById("taskList");
     let html = "";
     
+    // Load Subscribe Tasks
+    const cSnap = await db.collection("channels").get();
+    cSnap.forEach(doc => {
+        const c = doc.data(); 
+        const cid = "chan" + c.slot;
+        if(c.enabled && !compStr.includes(cid) && !proofsObj[cid]) {
+            html += `<div class="video-item" style="border-left:5px solid #28a745">
+                <span>Subscribe Task ${c.slot}</span>
+                <button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#28a745">Subscribe</button>
+            </div>`;
+        }
+    });
+
     // Load Video Tasks
     const vSnap = await db.collection("videos").get();
     vSnap.forEach(doc => {
@@ -320,6 +346,24 @@ async function loadTasks() {
     });
     
     list.innerHTML = html || "<p style='text-align:center; color:#aaa'>No tasks available!</p>";
+}
+
+// Subscribe Task Functions
+function openLinkBox(link, cid) { 
+    window.open(link, '_blank'); 
+    currentSlot = cid; 
+    document.getElementById("linkPopup").style.display = "flex"; 
+}
+
+function submitManualLink() {
+    const val = document.getElementById("proofLink").value;
+    if(!val) return alert("Please enter the link!");
+    
+    rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(val).then(() => {
+        alert("Proof Submitted for Review!"); 
+        document.getElementById("linkPopup").style.display = "none";
+        document.getElementById("proofLink").value = "";
+    });
 }
 
 // Withdrawal Logic
@@ -347,7 +391,6 @@ function submitWithdrawRequest() {
         details: `Method: ${method} | No: ${number} | Name: ${name}`, 
         status: 'pending'
     }).then(() => {
-        // Deduct/Track withdrawal locally first (server rules will validate)
         rtdb.ref('users/' + auth.currentUser.uid).update({ 
             withdrawnAmount: (userDataGlobal.withdrawnAmount || 0) + amount 
         });
@@ -373,8 +416,8 @@ function playVideo(url, sid) {
             videoId: vidId, 
             events: {
                 'onStateChange': e => {
-                    if(e.data == 1) startT(); // Playing
-                    else clearInterval(watchTimer); // Paused/Buffering
+                    if(e.data == 1) startT(); 
+                    else clearInterval(watchTimer); 
                 }
             }
         });
