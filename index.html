@@ -9,38 +9,59 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; background: #f0f2f5; display: flex; }
-        #sidebar { width: 280px; background: #1a1a1a; color: white; height: 100vh; padding: 20px; position: fixed; box-sizing: border-box; overflow-y: auto; z-index: 1000; }
-        #main-container { margin-left: 280px; width: calc(100% - 280px); padding: 20px; box-sizing: border-box; position: relative; z-index: 10; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #f0f2f5; overflow-x: hidden; }
+        
+        /* Sidebar Slide Menu */
+        #sidebar { 
+            width: 280px; background: #1a1a1a; color: white; height: 100vh; 
+            padding: 20px; position: fixed; left: -280px; top: 0; 
+            box-sizing: border-box; overflow-y: auto; z-index: 1000; 
+            transition: 0.3s ease-in-out; box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+        }
+        #sidebar.open { left: 0; }
+        
+        /* Overlay when sidebar is open */
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        #overlay.active { display: block; }
+
+        #main-container { width: 100%; padding: 20px; box-sizing: border-box; transition: 0.3s; }
+        
+        /* Top Navbar */
+        .top-bar { background: #fff; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; border-radius: 8px; }
+        .menu-btn { font-size: 24px; cursor: pointer; background: none; border: none; color: #333; width: auto; margin: 0; padding: 5px; }
+
         .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
         
-        .stat-box { cursor: pointer; padding: 10px; border-radius: 8px; transition: background 0.3s; flex: 1; border: 1px solid #eee; }
-        .stat-box:hover { background: #f8f9fa; }
-        .history-panel { display: none; margin-top: 10px; text-align: left; background: #fafafa; border-top: 1px solid #eee; padding: 10px; border-radius: 0 0 8px 8px; font-size: 13px; max-height: 150px; overflow-y: auto; }
+        /* Auth Tabs */
+        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
+        .tab-btn { flex: 1; padding: 10px; cursor: pointer; border: none; background: none; font-weight: bold; color: #888; }
+        .tab-btn.active { color: #1976d2; border-bottom: 2px solid #1976d2; }
 
         .sidebar-card { background: #2d2d2d; padding: 15px; border-radius: 10px; margin-bottom: 15px; text-align: left; border: 1px solid #444; }
         input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; border: none; background: #1976d2; color: white; }
         
-        #reopenBtn { background: orange !important; color: black !important; position: relative; z-index: 2000; display: block; width: 100%; }
-        
-        .google-btn { background: #4285F4; margin-bottom: 15px; } 
-        .video-item { background: white; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #1976d2; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #333; }
+        .stat-box { cursor: pointer; padding: 10px; border-radius: 8px; transition: background 0.3s; flex: 1; border: 1px solid #eee; }
+        .history-panel { display: none; margin-top: 10px; text-align: left; background: #fafafa; padding: 10px; font-size: 13px; border-radius: 8px; }
+
+        .video-item { background: white; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #1976d2; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 20px; }
         .hidden { display: none !important; }
-        
-        #disableContent { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f0f2f5; z-index: 9999; display: flex; align-items: center; justify-content: center; }
-        #disableMsg { text-align: center; padding: 30px; background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-width: 400px; width: 90%; }
-        
-        @media (max-width: 768px) { #sidebar { width: 100%; height: auto; position: relative; } body { flex-direction: column; } #main-container { margin-left: 0; width: 100%; } }
     </style>
 </head>
 <body>
 
-<div id="sidebar" class="hidden">
-    <h3 style="color: #1976d2; margin-top: 0;">My Profile</h3>
+<div id="overlay" onclick="toggleMenu()"></div>
+
+<div id="sidebar">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="color: #1976d2; margin: 0;">My Profile</h3>
+        <button onclick="toggleMenu()" style="width: auto; background: none; color: white; font-size: 20px; margin: 0;">×</button>
+    </div>
+    <hr style="border: 0.5px solid #444; margin: 15px 0;">
     <div class="sidebar-card"><label style="font-size:10px; color:#aaa">Email</label><div id="displayEmail">...</div></div>
     <div class="sidebar-card">
+        <label style="font-size:10px; color:#aaa">Change Password</label>
         <input type="password" id="newPass" placeholder="New Password">
         <button onclick="updateUserPassword()" style="background:#444; padding: 8px;">Update Password</button>
     </div>
@@ -55,16 +76,35 @@
 <div id="main-container">
     <div id="authBox" class="card" style="max-width: 400px; margin: 50px auto;">
         <h2>Smart Earn</h2>
-        <button class="google-btn" onclick="loginWithGoogle()">Login with Gmail</button>
-        <p style="color:gray; font-size:12px;">-- OR --</p>
-        <input id="email" placeholder="Email">
-        <input id="password" type="password" placeholder="Password">
-        <button onclick="handleAuth()">Login / Register</button>
+        <button style="background: #4285F4; margin-bottom: 15px;" onclick="loginWithGoogle()">Login with Gmail</button>
+        
+        <div class="auth-tabs">
+            <button id="tabLogin" class="tab-btn active" onclick="switchAuth('login')">Login</button>
+            <button id="tabRegister" class="tab-btn" onclick="switchAuth('register')">Register</button>
+        </div>
+
+        <div id="loginForm">
+            <input id="lEmail" placeholder="Email Address">
+            <input id="lPass" type="password" placeholder="Password">
+            <button onclick="handleLogin()">Login</button>
+        </div>
+
+        <div id="registerForm" class="hidden">
+            <input id="rName" placeholder="Full Name">
+            <input id="rEmail" placeholder="Email Address">
+            <input id="rPass" type="password" placeholder="Create Password">
+            <button onclick="handleRegister()" style="background: #28a745;">Create Account</button>
+        </div>
     </div>
 
     <div id="dashboard" class="hidden">
+        <div class="top-bar">
+            <button class="menu-btn" onclick="toggleMenu()">☰ Menu</button>
+            <div style="font-weight: bold; color: #1976d2;">Dashboard</div>
+        </div>
+
         <div class="card">
-            <h3>Work Stats (Click to view History)</h3>
+            <h3>Work Stats</h3>
             <div style="display:flex; justify-content:space-between; gap: 10px;">
                 <div class="stat-box" onclick="toggleHistory('watchHistory')">
                     <strong>Watch</strong><br>Rs <span id="watchPkr">0</span>
@@ -80,16 +120,16 @@
                 </div>
             </div>
         </div>
-        <h4>Your Tasks</h4>
+        <h4>Available Tasks</h4>
         <div id="taskList">Loading tasks...</div>
     </div>
 </div>
 
 <div id="disableContent" class="hidden">
-    <div id="disableMsg">
-        <h2 style="color:red">Account Temporary Disabled</h2>
+    <div style="text-align: center; padding: 30px; background: white; border-radius: 15px; max-width: 400px; margin: 100px auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+        <h2 style="color:red">Account Disabled</h2>
         <p>Admin ne aapka account arzi tor par band kar diya hai.</p>
-        <button id="reopenBtn" onclick="sendReopenRequest()">Reopen Request Bhejo</button>
+        <button id="reopenBtn" onclick="sendReopenRequest()" style="background: orange; color:black">Reopen Request Bhejo</button>
         <p id="reqSentMsg" style="color:green; font-weight:bold; margin-top:15px;" class="hidden">✓ Request sent! Admin review karega.</p>
         <button onclick="auth.signOut()" style="background:#888; margin-top:20px">Logout</button>
     </div>
@@ -124,73 +164,68 @@ let currentSlot = "";
 let userDataGlobal = null;
 let currentTotalBalance = 0;
 
-// --- PASSWORD UPDATE LOGIC ---
-function updateUserPassword() {
-    const newPass = document.getElementById("newPass").value;
-    if(newPass.length < 6) return alert("Password kam se kam 6 huroof ka hona chahiye!");
+// --- MENU TOGGLE ---
+function toggleMenu() {
+    document.getElementById("sidebar").classList.toggle("open");
+    document.getElementById("overlay").classList.toggle("active");
+}
+
+// --- AUTH UI SWITCH ---
+function switchAuth(mode) {
+    if(mode === 'login') {
+        document.getElementById("loginForm").classList.remove("hidden");
+        document.getElementById("registerForm").classList.add("hidden");
+        document.getElementById("tabLogin").classList.add("active");
+        document.getElementById("tabRegister").classList.remove("active");
+    } else {
+        document.getElementById("loginForm").classList.add("hidden");
+        document.getElementById("registerForm").classList.remove("hidden");
+        document.getElementById("tabLogin").classList.remove("active");
+        document.getElementById("tabRegister").classList.add("active");
+    }
+}
+
+// --- LOGIN LOGIC ---
+function handleLogin() {
+    const email = document.getElementById("lEmail").value;
+    const pass = document.getElementById("lPass").value;
+    if(!email || !pass) return alert("Email aur Password likhein!");
     
-    auth.currentUser.updatePassword(newPass).then(() => {
-        alert("Password kamyabi se update ho gaya!");
-        document.getElementById("newPass").value = "";
-    }).catch(error => {
-        if(error.code === 'auth/requires-recent-login') {
-            alert("Hifazati wajah se, aapko dobara login kar ke password badalna hoga.");
-            auth.signOut();
-        } else {
-            alert("Error: " + error.message);
-        }
+    auth.signInWithEmailAndPassword(email, pass).catch(err => {
+        alert("Login Fail: " + err.message);
     });
 }
 
-// --- WITHDRAW LOGIC ---
-function applyWithdraw() {
-    if(currentTotalBalance < 100) return alert("Minimum withdrawal Rs 100 hai!");
+// --- REGISTER LOGIC ---
+function handleRegister() {
+    const name = document.getElementById("rName").value;
+    const email = document.getElementById("rEmail").value;
+    const pass = document.getElementById("rPass").value;
     
-    const walletInfo = prompt("Apna JazzCash/EasyPaisa number aur naam likhein:");
-    if(!walletInfo) return;
+    if(!name || !email || pass.length < 6) return alert("Tamam fields bharein (Password min 6 letters)!");
 
-    const reqId = Date.now();
-    const withdrawData = {
-        uid: auth.currentUser.uid,
-        email: auth.currentUser.email,
-        amount: currentTotalBalance,
-        details: walletInfo,
-        status: 'pending',
-        timestamp: reqId
-    };
-
-    rtdb.ref('withdrawRequests/' + reqId).set(withdrawData).then(() => {
-        // Balance temporary lock karne ke liye withdrawnAmount update karein
-        const newWithdrawn = (userDataGlobal.withdrawnAmount || 0) + currentTotalBalance;
-        rtdb.ref('users/' + auth.currentUser.uid).update({ withdrawnAmount: newWithdrawn });
-        alert("Withdrawal request bhej di gayi hai!");
-    }).catch(e => alert("Error: " + e.message));
+    auth.createUserWithEmailAndPassword(email, pass).then(cred => {
+        rtdb.ref('users/' + cred.user.uid).set({
+            email: email, name: name, watch: 0, subPoints: 0, status: 'active', bonus: 0, withdrawnAmount: 0
+        }).then(() => {
+            alert("Account ban gaya!");
+        });
+    }).catch(err => alert("Error: " + err.message));
 }
 
-function toggleHistory(id) {
-    const el = document.getElementById(id);
-    const isVisible = el.style.display === "block";
-    document.querySelectorAll('.history-panel').forEach(p => p.style.display = "none");
-    el.style.display = isVisible ? "none" : "block";
+function loginWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(error => alert(error.message));
 }
 
-function sendReopenRequest() {
-    rtdb.ref('users/' + auth.currentUser.uid).update({ reopenRequest: true })
-    .then(() => {
-        alert("Reopen request bhej di gayi hai!");
-        document.getElementById("reopenBtn").classList.add("hidden");
-        document.getElementById("reqSentMsg").classList.remove("hidden");
-    }).catch(e => alert("Error: " + e.message));
-}
-
+// --- USER DATA & DASHBOARD ---
 auth.onAuthStateChanged(user => {
     if(user){
-        authBox.classList.add("hidden"); 
+        document.getElementById("authBox").classList.add("hidden"); 
         rtdb.ref('users/' + user.uid).on('value', snap => {
             userDataGlobal = snap.val() || {};
             if(userDataGlobal.status === "disabled") {
                 document.getElementById("dashboard").classList.add("hidden");
-                document.getElementById("sidebar").classList.add("hidden");
                 document.getElementById("disableContent").classList.remove("hidden");
                 if(userDataGlobal.reopenRequest) {
                     document.getElementById("reopenBtn").classList.add("hidden");
@@ -199,16 +234,15 @@ auth.onAuthStateChanged(user => {
             } else {
                 document.getElementById("disableContent").classList.add("hidden");
                 document.getElementById("dashboard").classList.remove("hidden");
-                document.getElementById("sidebar").classList.remove("hidden");
                 document.getElementById("displayEmail").innerText = user.email;
                 renderDashboard(user.uid);
             }
         });
     } else { 
-        authBox.classList.remove("hidden"); 
-        dashboard.classList.add("hidden"); 
-        sidebar.classList.add("hidden");
-        disableContent.classList.add("hidden");
+        document.getElementById("authBox").classList.remove("hidden"); 
+        document.getElementById("dashboard").classList.add("hidden"); 
+        document.getElementById("sidebar").classList.remove("open");
+        document.getElementById("overlay").classList.remove("active");
     }
 });
 
@@ -228,21 +262,6 @@ function renderDashboard(uid) {
     document.getElementById("bonusHistory").innerHTML = `<div>Bonus Total: Rs ${bonusAmt.toFixed(2)}</div>`;
     
     loadTasks(userDataGlobal.completed || "", userDataGlobal.proofs || {});
-}
-
-function handleAuth() {
-    auth.signInWithEmailAndPassword(email.value, password.value).catch(() => {
-        auth.createUserWithEmailAndPassword(email.value, password.value).then(cred => {
-            rtdb.ref('users/' + cred.user.uid).set({
-                email: cred.user.email, name: 'User', watch: 0, subPoints: 0, status: 'active', bonus: 0
-            });
-        });
-    });
-}
-
-function loginWithGoogle() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(error => alert(error.message));
 }
 
 async function loadTasks(compStr, proofsObj) {
@@ -265,15 +284,53 @@ async function loadTasks(compStr, proofsObj) {
     list.innerHTML = html || "No tasks available!";
 }
 
-function openLinkBox(link, cid) { window.open(link, '_blank'); currentSlot = cid; document.getElementById("linkPopup").style.display = "flex"; }
+// --- PASSWORD & WITHDRAW ---
+function updateUserPassword() {
+    const newPass = document.getElementById("newPass").value;
+    if(newPass.length < 6) return alert("Password kam se kam 6 huroof ka hona chahiye!");
+    auth.currentUser.updatePassword(newPass).then(() => {
+        alert("Password updated!");
+        document.getElementById("newPass").value = "";
+    }).catch(e => alert(e.message));
+}
 
+function applyWithdraw() {
+    if(currentTotalBalance < 100) return alert("Minimum withdrawal Rs 100 hai!");
+    const walletInfo = prompt("Apna JazzCash/EasyPaisa number aur naam likhein:");
+    if(!walletInfo) return;
+    const reqId = Date.now();
+    rtdb.ref('withdrawRequests/' + reqId).set({
+        uid: auth.currentUser.uid, email: auth.currentUser.email,
+        amount: currentTotalBalance, details: walletInfo, status: 'pending', timestamp: reqId
+    }).then(() => {
+        const newWithdrawn = (userDataGlobal.withdrawnAmount || 0) + currentTotalBalance;
+        rtdb.ref('users/' + auth.currentUser.uid).update({ withdrawnAmount: newWithdrawn });
+        alert("Withdrawal request bhej di gayi hai!");
+    });
+}
+
+function toggleHistory(id) {
+    const el = document.getElementById(id);
+    const isVisible = el.style.display === "block";
+    document.querySelectorAll('.history-panel').forEach(p => p.style.display = "none");
+    el.style.display = isVisible ? "none" : "block";
+}
+
+function sendReopenRequest() {
+    rtdb.ref('users/' + auth.currentUser.uid).update({ reopenRequest: true })
+    .then(() => {
+        document.getElementById("reopenBtn").classList.add("hidden");
+        document.getElementById("reqSentMsg").classList.remove("hidden");
+    });
+}
+
+function openLinkBox(link, cid) { window.open(link, '_blank'); currentSlot = cid; document.getElementById("linkPopup").style.display = "flex"; }
 function submitManualLink() {
     const linkVal = document.getElementById("proofLink").value;
-    if(!linkVal.includes("http")) return alert("Please enter a valid link!");
+    if(!linkVal.includes("http")) return alert("Link sahi nahi hai!");
     rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(linkVal).then(() => {
-        alert("Success!");
+        alert("Submitted!");
         document.getElementById("linkPopup").style.display = "none";
-        document.getElementById("proofLink").value = "";
     });
 }
 
