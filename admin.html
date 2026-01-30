@@ -11,120 +11,69 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root { --primary: #1976d2; --dark: #0f172a; --sidebar-w: 260px; }
-        body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7fe; display: flex; }
-        
-        /* Sidebar Styling */
-        #sidebar { width: var(--sidebar-w); background: var(--dark); color: white; height: 100vh; position: fixed; transition: 0.3s; z-index: 1000; }
-        .sidebar-header { padding: 20px; text-align: center; background: #1e293b; font-weight: bold; font-size: 1.2rem; border-bottom: 1px solid #334155; }
-        .nav-link { padding: 15px 25px; display: block; color: #cbd5e1; text-decoration: none; transition: 0.3s; border-bottom: 1px solid #1e293b; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f7fe; display: flex; }
+        #sidebar { width: var(--sidebar-w); background: var(--dark); color: white; height: 100vh; position: fixed; z-index: 1000; }
+        .sidebar-header { padding: 20px; text-align: center; background: #1e293b; font-weight: bold; border-bottom: 1px solid #334155; }
+        .nav-link { padding: 15px 25px; display: block; color: #cbd5e1; text-decoration: none; border-bottom: 1px solid #1e293b; }
         .nav-link:hover { background: #334155; color: white; }
-        .nav-link i { margin-right: 10px; width: 20px; }
-
-        /* Main Content */
         #main { flex: 1; margin-left: var(--sidebar-w); padding: 20px; width: calc(100% - var(--sidebar-w)); }
         header { background: white; padding: 15px 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
-        
         .card { background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        .card h3 { margin-top: 0; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; color: var(--dark); }
-
-        /* Tables */
-        .table-responsive { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
         th { background: #f8fafc; color: #64748b; text-transform: uppercase; font-size: 11px; }
-        
-        /* Buttons */
-        .btn { padding: 6px 12px; border-radius: 6px; cursor: pointer; border: none; font-size: 12px; font-weight: 600; margin-right: 5px; }
+        .btn { padding: 6px 10px; border-radius: 6px; cursor: pointer; border: none; font-size: 11px; font-weight: 600; margin: 2px; }
         .btn-green { background: #10b981; color: white; }
         .btn-red { background: #ef4444; color: white; }
         .btn-blue { background: #3b82f6; color: white; }
         .btn-orange { background: #f59e0b; color: white; }
-        
-        /* Badge */
         .badge { padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; }
         .bg-active { background: #dcfce7; color: #15803d; }
         .bg-disabled { background: #fee2e2; color: #b91c1c; }
-
-        #authBox { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; }
-        #authBox input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
         .hidden { display: none !important; }
+        #authBox { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 15px; text-align: center; }
+        #authBox input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
     </style>
 </head>
 <body>
 
 <div id="authBox">
-    <i class="fas fa-user-shield" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
     <h2>Admin Login</h2>
-    <input type="email" id="adminEmail" placeholder="Email Address">
+    <input type="email" id="adminEmail" placeholder="Email">
     <input type="password" id="adminPass" placeholder="Password">
-    <button class="btn btn-blue" style="width:100%; padding: 12px;" onclick="adminLogin()">Access Dashboard</button>
+    <button class="btn btn-blue" style="width:100%; padding:12px" onclick="adminLogin()">Login</button>
 </div>
 
 <div id="adminContent" class="hidden">
     <div id="sidebar">
         <div class="sidebar-header">SMART EARN PANEL</div>
-        <a href="#" class="nav-link"><i class="fas fa-home"></i> Dashboard</a>
-        <a href="#usersSection" class="nav-link"><i class="fas fa-users"></i> Manage Users</a>
+        <a href="#" class="nav-link"><i class="fas fa-users"></i> Manage Users</a>
         <a href="#withdrawSection" class="nav-link"><i class="fas fa-wallet"></i> Withdrawals</a>
         <a href="#tasksSection" class="nav-link"><i class="fas fa-tasks"></i> Task Links</a>
-        <div style="padding: 20px;">
-            <button onclick="firebase.auth().signOut()" class="btn btn-red" style="width:100%">Logout</button>
-        </div>
+        <button onclick="firebase.auth().signOut()" class="btn btn-red" style="width:80%; margin:20px">Logout</button>
     </div>
 
     <div id="main">
         <header>
-            <div style="font-size: 1.5rem; font-weight: bold; color: var(--dark);">Control Center</div>
-            <div id="adminUser" style="color: #64748b;">Welcome, Admin</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">User Management Dashboard</div>
         </header>
 
-        <div id="withdrawSection" class="card">
-            <h3><i class="fas fa-money-bill-wave"></i> Pending Withdrawals</h3>
-            <div class="table-responsive">
+        <div class="card">
+            <h3><i class="fas fa-user-shield"></i> User Control List</h3>
+            <div style="overflow-x:auto;">
                 <table>
                     <thead>
                         <tr>
-                            <th>User Email</th>
-                            <th>Amount (Rs)</th>
-                            <th>Payout Details</th>
+                            <th>User Details</th>
+                            <th>Credentials</th>
+                            <th>Vault Balance</th>
+                            <th>Status</th>
+                            <th>Proof Approval</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
-                    <tbody id="withdrawList"><tr><td colspan="4">Checking requests...</td></tr></tbody>
+                    <tbody id="usersList"><tr><td colspan="6">Loading...</td></tr></tbody>
                 </table>
-            </div>
-        </div>
-
-        <div id="usersSection" class="card">
-            <h3><i class="fas fa-user-cog"></i> Registered Users Management</h3>
-            <div class="table-responsive">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User Info</th>
-                            <th>Password & Contact</th>
-                            <th>Earnings / Bonus</th>
-                            <th>Status</th>
-                            <th>Proofs Approval</th>
-                            <th>Master Control</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersList"><tr><td colspan="6">Loading database...</td></tr></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="tasksSection" class="card">
-            <h3><i class="fas fa-link"></i> Manage Task Slots</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <h4>Video Slots (1-10)</h4>
-                    <div id="videoSlots"></div>
-                </div>
-                <div>
-                    <h4>Channel Slots (1-5)</h4>
-                    <div id="channelSlots"></div>
-                </div>
             </div>
         </div>
     </div>
@@ -141,12 +90,10 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
-const db = firebase.firestore();
 const rtdb = firebase.database();
 
 function adminLogin() {
-    auth.signInWithEmailAndPassword(adminEmail.value, adminPass.value)
-        .catch(err => alert("Error: " + err.message));
+    auth.signInWithEmailAndPassword(adminEmail.value, adminPass.value).catch(e => alert(e.message));
 }
 
 auth.onAuthStateChanged(user => {
@@ -154,41 +101,11 @@ auth.onAuthStateChanged(user => {
         document.getElementById("authBox").classList.add("hidden");
         document.getElementById("adminContent").classList.remove("hidden");
         loadAdminData();
-        loadWithdrawRequests();
-        initSlots();
     } else {
         document.getElementById("authBox").classList.remove("hidden");
         document.getElementById("adminContent").classList.add("hidden");
     }
 });
-
-function loadWithdrawRequests() {
-    rtdb.ref('withdrawRequests').on('value', snap => {
-        const list = document.getElementById("withdrawList");
-        list.innerHTML = "";
-        let found = false;
-        snap.forEach(child => {
-            const req = child.val();
-            if(req.status === "pending") {
-                found = true;
-                list.innerHTML += `<tr>
-                    <td>${req.email}</td>
-                    <td>Rs ${req.amount}</td>
-                    <td><small>${req.details}</small></td>
-                    <td>
-                        <button class="btn btn-green" onclick="handleWithdrawStatus('${child.key}', 'Approved')">Approve</button>
-                        <button class="btn btn-red" onclick="handleWithdrawStatus('${child.key}', 'Rejected')">Reject</button>
-                    </td>
-                </tr>`;
-            }
-        });
-        if(!found) list.innerHTML = "<tr><td colspan='4'>No pending withdrawals.</td></tr>";
-    });
-}
-
-function handleWithdrawStatus(id, status) {
-    rtdb.ref('withdrawRequests/' + id).update({ status: status }).then(() => alert("Withdraw " + status));
-}
 
 function loadAdminData() {
     rtdb.ref('users').on('value', snap => {
@@ -197,6 +114,13 @@ function loadAdminData() {
         snap.forEach(child => {
             const uid = child.key;
             const u = child.val();
+            
+            // Calculate real balance like index.html
+            let watchAmt = (u.watch || 0) * 0.38;
+            let subAmt = (u.subPoints || 0) * 0.60;
+            let bonusAmt = (u.bonus || 0);
+            let totalVault = (watchAmt + subAmt + bonusAmt) - (u.withdrawnAmount || 0);
+
             const status = u.status !== "disabled";
             const proofs = u.proofs || {};
             const completed = u.completed || "";
@@ -204,32 +128,30 @@ function loadAdminData() {
             let proofHtml = "";
             Object.keys(proofs).forEach(cid => {
                 const isApproved = completed.includes(cid);
-                proofHtml += `
-                    <div style="margin-bottom:8px; background:#f1f5f9; padding:5px; border-radius:5px">
-                        <small><b>Slot: ${cid}</b></small><br>
-                        <a href="${proofs[cid]}" target="_blank" style="color:blue; font-size:10px">View Screenshot</a><br>
-                        ${!isApproved ? `
-                            <button class="btn btn-green" style="padding:2px 5px; font-size:9px" onclick="approveSub('${uid}','${cid}')">Approve</button>
-                            <button class="btn btn-red" style="padding:2px 5px; font-size:9px" onclick="rejectProof('${uid}','${cid}')">Reject</button>
-                        ` : '<span style="color:#15803d; font-size:10px">✓ Approved</span>'}
+                if(!isApproved) {
+                    proofHtml += `<div style="margin-bottom:5px">
+                        <small>Slot: ${cid}</small><br>
+                        <a href="${proofs[cid]}" target="_blank" class="btn btn-blue" style="font-size:9px">View</a>
+                        <button class="btn btn-green" style="font-size:9px" onclick="approveSub('${uid}','${cid}')">Ok</button>
                     </div>`;
+                }
             });
 
             list.innerHTML += `<tr>
-                <td><b>${u.name || 'User'}</b><br><small>${u.email}</small></td>
+                <td><b>${u.name || 'No Name'}</b><br><small>${u.email || 'No Email'}</small></td>
                 <td>
-                    <b>PW:</b> ${u.password || 'N/A'}<br>
-                    <b>Ph:</b> ${u.phone || 'N/A'} <br>
-                    <button class="btn btn-blue" style="padding:2px 5px; font-size:9px" onclick="editPassword('${uid}')">Edit Pass</button>
+                    <b>PW:</b> <span style="color:red">${u.password || 'Old User'}</span><br>
+                    <button class="btn btn-blue" onclick="editPassword('${uid}')">Edit Pass</button>
                 </td>
                 <td>
-                    Watch: ${u.watch || 0} <br>
-                    Subs: ${u.subPoints || 0} <br>
-                    Bonus: Rs ${u.bonus || 0} <br>
-                    <button class="btn btn-orange" style="padding:2px 5px; font-size:9px" onclick="editBalance('${uid}')">Edit Balance</button>
+                    <div style="background:#e8f5e9; padding:5px; border-radius:5px; border-left:3px solid #2e7d32">
+                        <b>Rs ${totalVault.toFixed(2)}</b>
+                    </div>
+                    <small>Bonus: Rs ${u.bonus || 0}</small><br>
+                    <button class="btn btn-orange" onclick="editVault('${uid}', ${u.bonus || 0})">Add Bonus/Change</button>
                 </td>
                 <td><span class="badge ${status ? 'bg-active':'bg-disabled'}">${status ? 'ACTIVE':'DISABLED'}</span></td>
-                <td>${proofHtml || '<small style="color:#999">No proofs</small>'}</td>
+                <td>${proofHtml || '<small>No Pending</small>'}</td>
                 <td>
                     <button class="btn ${status ? 'btn-orange':'btn-green'}" onclick="toggleUser('${uid}', ${status})">${status ? 'Disable':'Enable'}</button>
                     <button class="btn btn-red" onclick="deleteUser('${uid}')">Del</button>
@@ -239,24 +161,19 @@ function loadAdminData() {
     });
 }
 
-// Edit User Functions
-function editPassword(uid) {
-    const newPass = prompt("Enter new password for user:");
-    if(newPass && newPass.length >= 6) {
-        rtdb.ref('users/' + uid).update({ password: newPass }).then(() => alert("Password Updated!"));
-    } else {
-        alert("Password too short!");
+function editVault(uid, currentBonus) {
+    const amount = prompt("Current Bonus is Rs " + currentBonus + ".\nNaya Bonus amount likhein (e.g. 50 add karne ke liye total likhein):", currentBonus);
+    if(amount !== null) {
+        rtdb.ref('users/' + uid).update({ bonus: parseFloat(amount) })
+        .then(() => alert("Vault updated! User ka balance change ho gaya."));
     }
 }
 
-function editBalance(uid) {
-    const watch = prompt("Enter new Watch count:");
-    const bonus = prompt("Enter new Bonus amount (Rs):");
-    const update = {};
-    if(watch !== null) update.watch = parseInt(watch);
-    if(bonus !== null) update.bonus = parseFloat(bonus);
-    
-    rtdb.ref('users/' + uid).update(update).then(() => alert("Balance Updated!"));
+function editPassword(uid) {
+    const newPass = prompt("Naya password likhein (min 6 chars):");
+    if(newPass && newPass.length >= 6) {
+        rtdb.ref('users/' + uid).update({ password: newPass }).then(() => alert("Password Changed!"));
+    }
 }
 
 function approveSub(uid, cid) {
@@ -265,42 +182,17 @@ function approveSub(uid, cid) {
         rtdb.ref('users/' + uid).update({
             subPoints: (d.subPoints || 0) + 1,
             completed: (d.completed || "") + "," + cid
-        }).then(() => alert("Proof Approved! Bonus Added."));
+        }).then(() => alert("Proof Approved!"));
     });
 }
 
-function rejectProof(uid, cid) {
-    if(confirm("Reject this proof? Link will be removed.")) {
-        rtdb.ref(`users/${uid}/proofs/${cid}`).remove().then(() => alert("Proof rejected."));
-    }
-}
-
 function toggleUser(uid, currentStatus) {
-    const newStatus = currentStatus ? "disabled" : "active";
-    rtdb.ref('users/' + uid).update({ status: newStatus, reopenRequest: false }).then(() => alert("Status Updated!"));
+    rtdb.ref('users/' + uid).update({ status: currentStatus ? "disabled" : "active" });
 }
 
 function deleteUser(uid) {
-    if(confirm("Confirm user deletion?")) {
-        rtdb.ref('users/' + uid).remove().then(() => alert("User Deleted."));
-    }
+    if(confirm("User ko delete kar dein?")) rtdb.ref('users/' + uid).remove();
 }
-
-function initSlots() {
-    let vHtml = "";
-    for(let i=1; i<=10; i++) vHtml += `<div style="margin-bottom:10px"><input id="v${i}" style="width:70%; padding:5px" placeholder="Video Link ${i}"><button class="btn btn-blue" onclick="saveV(${i})">Save</button></div>`;
-    document.getElementById("videoSlots").innerHTML = vHtml;
-    
-    let cHtml = "";
-    for(let i=1; i<=5; i++) cHtml += `<div style="margin-bottom:10px"><input id="c${i}" style="width:70%; padding:5px" placeholder="Channel Link ${i}"><button class="btn btn-green" onclick="saveC(${i})">Save</button></div>`;
-    document.getElementById("channelSlots").innerHTML = cHtml;
-
-    for(let i=1; i<=10; i++) db.collection("videos").doc("slot"+i).get().then(d=>{if(d.exists)document.getElementById("v"+i).value=d.data().link;});
-    for(let i=1; i<=5; i++) db.collection("channels").doc("chan"+i).get().then(d=>{if(d.exists)document.getElementById("c"+i).value=d.data().link;});
-}
-
-function saveV(n){ db.collection("videos").doc("slot"+n).set({slot:n, link:document.getElementById("v"+n).value, enabled:true}).then(()=>alert("Saved Video "+n)); }
-function saveC(n){ db.collection("channels").doc("chan"+n).set({slot:n, link:document.getElementById("c"+n).value, enabled:true}).then(()=>alert("Saved Channel "+n)); }
 </script>
 </body>
 </html>
