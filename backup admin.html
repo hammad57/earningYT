@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel - Control Center</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<style>
+    body{margin:0;font-family:Arial, sans-serif;background:#eef1f5}
+    header{background:#000;color:#fff;padding:15px;text-align:center;font-size:20px}
+    .container{padding:20px; max-width: 1100px; margin: auto;}
+    .card{background:#fff;padding:20px;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 5px rgba(0,0,0,0.1)}
+    table{width:100%;border-collapse:collapse;margin-top:15px;background:#fff; font-size: 14px;}
+    th,td{border:1px solid #ddd;padding:10px;text-align:center}
+    th{background:#f8f9fa}
+    .proof-btn{display:inline-block; padding:5px 10px; background:#1976d2; color:white; text-decoration:none; border-radius:4px; font-size:12px; margin:2px}
+    .approve-btn{background:#28a745; color:white; border:none; padding:8px 12px; border-radius:4px; cursor:pointer; font-weight:bold; font-size:12px}
+    .action-btn{padding:5px 10px; border-radius:4px; cursor:pointer; border:none; color:white; font-size:11px; margin:2px; font-weight:bold}
+    .btn-red{background:#dc3545}
+    .btn-orange{background:#fd7e14}
+    .btn-green{background:#28a745}
+    .slot-input{width:70%; padding:8px; margin:5px; border:1px solid #ddd; border-radius:4px}
+    .save-btn{padding:8px 15px; background:#333; color:white; border:none; border-radius:4px; cursor:pointer}
+    .hidden { display: none; }
+    #authBox { max-width: 400px; margin: 100px auto; text-align: center; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    #authBox input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 5px; }
+    #authBox button { width: 95%; padding: 10px; background: #000; color: white; border: none; border-radius: 5px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="authBox">
+    <h2>Admin Login</h2>
+    <input type="email" id="adminEmail" placeholder="Admin Email">
+    <input type="password" id="adminPass" placeholder="Password">
+    <button onclick="adminLogin()">Login to Dashboard</button>
+</div>
+
+<div id="adminContent" class="hidden">
+    <header>Admin Control - All Tasks & Approvals</header>
+    <div class="container">
+        <div class="card">
+            <h3>Withdrawal Requests</h3>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User Email</th>
+                            <th>Amount (Rs)</th>
+                            <th>Payout (+Bonus)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="withdrawList"><tr><td colspan="4">No pending requests</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Manage Task Links</h3>
+            <div id="setupArea">
+                <h4>Video Slots (1-10)</h4><div id="videoSlots"></div><hr>
+                <h4>Channel Slots (1-5)</h4><div id="channelSlots"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Registered Users & Proof Approvals</h3>
+            <div style="overflow-x:auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User Name</th>
+                            <th>Email</th>
+                            <th>Watch</th>
+                            <th>Status</th>
+                            <th>Proofs</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersList"><tr><td colspan="6">Loading data...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+        <button onclick="firebase.auth().signOut()" style="margin:20px; padding:10px; background:red; color:white; border:none; border-radius:5px; cursor:pointer;">Logout Admin</button>
+    </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ",
+  authDomain: "own-live-steam-web.firebaseapp.com",
+  projectId: "own-live-steam-web",
+  databaseURL: "https://own-live-steam-web-default-rtdb.firebaseio.com",
+  messagingSenderId: "132045886996",
+  appId: "1:132045886996:web:8a6d937c3548afd2477901"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+const rtdb = firebase.database();
+
+function adminLogin() {
+    auth.signInWithEmailAndPassword(adminEmail.value, adminPass.value)
+        .catch(err => alert("Login Failed: " + err.message));
+}
+
+auth.onAuthStateChanged(user => {
+    if(user) {
+        document.getElementById("authBox").classList.add("hidden");
+        document.getElementById("adminContent").classList.remove("hidden");
+        loadAdminData();
+        loadWithdrawRequests();
+        initSlots();
+    } else {
+        document.getElementById("authBox").classList.remove("hidden");
+        document.getElementById("adminContent").classList.add("hidden");
+    }
+});
+
+function loadWithdrawRequests() {
+    rtdb.ref('withdrawRequests').on('value', snap => {
+        const list = document.getElementById("withdrawList");
+        list.innerHTML = "";
+        snap.forEach(child => {
+            const req = child.val();
+            if(req.status === "pending") {
+                list.innerHTML += `<tr>
+                    <td>${req.email}</td>
+                    <td>${req.amount}</td>
+                    <td><strong>${req.payout}</strong></td>
+                    <td>
+                        <button class="approve-btn" onclick="handleWithdrawStatus('${child.key}', 'Approved')">Approve</button>
+                        <button class="action-btn btn-red" onclick="handleWithdrawStatus('${child.key}', 'Rejected')">Reject</button>
+                    </td>
+                </tr>`;
+            }
+        });
+    });
+}
+
+function handleWithdrawStatus(id, status) {
+    rtdb.ref('withdrawRequests/' + id).update({ status: status }).then(() => alert("Withdraw " + status));
+}
+
+function loadAdminData() {
+    rtdb.ref('users').on('value', snap => {
+        const list = document.getElementById("usersList");
+        list.innerHTML = "";
+        snap.forEach(child => {
+            const uid = child.key;
+            const u = child.val();
+            const proofs = u.proofs || {};
+            const completed = u.completed || "";
+            const status = u.status !== "disabled";
+            const reopenReq = u.reopenRequest === true; // Reopen check
+
+            let proofHtml = "";
+            Object.keys(proofs).forEach(cid => {
+                const isApproved = completed.includes(cid);
+                proofHtml += `
+                    <div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px">
+                        <span style="font-size:11px; font-weight:bold; color:green">Slot: ${cid}</span><br>
+                        <a href="${proofs[cid]}" target="_blank" class="proof-btn">View Link</a><br>
+                        ${!isApproved ? `<button class="approve-btn" onclick="approveSub('${uid}','${cid}')">Approve</button>` : '<span style="color:blue">✓ Approved</span>'}
+                    </div>`;
+            });
+
+            list.innerHTML += `<tr>
+                <td><strong>${u.name || 'User'}</strong></td>
+                <td>${u.email || 'N/A'}</td> 
+                <td>${u.watch || 0}</td>
+                <td>
+                    <span style="color:${status ? 'green':'red'}; font-weight:bold">${status ? 'Active':'Disabled'}</span>
+                    ${reopenReq ? '<br><span style="color:orange; font-size:10px;">[REOPEN REQUESTED]</span>' : ''}
+                </td>
+                <td>${proofHtml || 'No Proof'}</td>
+                <td>
+                    <button class="action-btn ${status ? 'btn-orange':'btn-green'}" onclick="toggleUser('${uid}', ${status})">
+                        ${status ? 'Disable' : 'Enable'}
+                    </button>
+                    <button class="action-btn btn-red" onclick="deleteUser('${uid}')">Delete</button>
+                </td>
+            </tr>`;
+        });
+    });
+}
+
+function toggleUser(uid, currentStatus) {
+    const newStatus = currentStatus ? "disabled" : "active";
+    // Jab admin enable kare to reopenRequest khatam ho jaye
+    const updateData = { status: newStatus };
+    if(newStatus === "active") updateData.reopenRequest = false;
+
+    rtdb.ref('users/' + uid).update(updateData).then(() => alert("User status updated!"));
+}
+
+function deleteUser(uid) {
+    if(confirm("Kya aap is user ko delete karna chahte hain?")) {
+        rtdb.ref('users/' + uid).remove().then(() => alert("User deleted."));
+    }
+}
+
+function approveSub(uid, cid) {
+    rtdb.ref('users/' + uid).once('value', s => {
+        const d = s.val();
+        rtdb.ref('users/' + uid).update({
+            subPoints: (d.subPoints || 0) + 1,
+            completed: (d.completed || "") + "," + cid
+        }).then(() => alert("Approved!"));
+    });
+}
+
+function initSlots() {
+    let vHtml = "";
+    for(let i=1; i<=10; i++) vHtml += `<input id="v${i}" class="slot-input" placeholder="Video ${i}"><button class="save-btn" onclick="saveV(${i})">Save</button><br>`;
+    document.getElementById("videoSlots").innerHTML = vHtml;
+    let cHtml = "";
+    for(let i=1; i<=5; i++) cHtml += `<input id="c${i}" class="slot-input" placeholder="Chan ${i}"><button class="save-btn" style="background:#28a745" onclick="saveC(${i})">Save</button><br>`;
+    document.getElementById("channelSlots").innerHTML = cHtml;
+    for(let i=1; i<=10; i++) db.collection("videos").doc("slot"+i).get().then(d=>{if(d.exists)document.getElementById("v"+i).value=d.data().link;});
+    for(let i=1; i<=5; i++) db.collection("channels").doc("chan"+i).get().then(d=>{if(d.exists)document.getElementById("c"+i).value=d.data().link;});
+}
+
+function saveV(n){ db.collection("videos").doc("slot"+n).set({slot:n, link:document.getElementById("v"+n).value, enabled:true}).then(()=>alert("Saved!")); }
+function saveC(n){ db.collection("channels").doc("chan"+n).set({slot:n, link:document.getElementById("c"+n).value, enabled:true}).then(()=>alert("Saved!")); }
+</script>
+</body>
+</html>
