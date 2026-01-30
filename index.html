@@ -51,7 +51,11 @@
         .card { background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-bottom: 20px; border: 1px solid #334155; }
         .top-bar { background: #1e293b; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; }
         
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; box-sizing: border-box; }
+        /* Fixed styling for inputs and select */
+        input, select { 
+            width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; 
+            border-radius: 8px; background: #0f172a; color: white; box-sizing: border-box; 
+        }
         button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; background: var(--primary); color: white; }
         
         .video-item { background: #1e293b; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary); }
@@ -100,19 +104,7 @@
             <div class="feat-card"><i class="fas fa-users" style="font-size:2rem; color:#60a5fa"></i><h3>Refer Friends</h3><p>Apne doston ko join karwayein aur Rs 10 tak per referral kamayein.</p></div>
             <div class="feat-card"><i class="fas fa-check-circle" style="font-size:2rem; color:#22c55e"></i><h3>Daily Withdraw</h3><p>Easypaisa aur Jazzcash mein daily payments hasil karein.</p></div>
         </div>
-
-        <h2 class="section-title">Latest Withdrawal Proofs</h2>
-        <div class="features">
-            <div class="proof-item"><img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400" alt="Proof"><span style="display:block; text-align:center; margin-top:10px;">Ali Raza - Rs 850</span></div>
-            <div class="proof-item"><img src="https://images.unsplash.com/photo-1580519542036-c47de6196ba5?w=400" alt="Proof"><span style="display:block; text-align:center; margin-top:10px;">Mehak - Rs 1400</span></div>
-            <div class="proof-item"><img src="https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?w=400" alt="Proof"><span style="display:block; text-align:center; margin-top:10px;">Sajid Khan - Rs 500</span></div>
         </div>
-
-        <h2 class="section-title">Payment Methods</h2>
-        <div class="pay-methods">
-            <div class="pay-card">Easypaisa</div><div class="pay-card">JazzCash</div><div class="pay-card">NayaPay</div><div class="pay-card">Zindagi</div><div class="pay-card">Bank Transfer</div>
-        </div>
-    </div>
 
     <div id="authBox" class="card" style="max-width: 450px; margin: 80px auto; padding: 30px;">
         <h2 style="text-align:center; color:#60a5fa">Join Community</h2>
@@ -133,10 +125,6 @@
             <button onclick="handleRegister()" style="background: var(--success);">Create Account</button>
         </div>
     </div>
-
-    <footer style="text-align:center; padding: 50px 20px; background: #0f172a;">
-        <p>Support: <a href="mailto:mysw786@gmail.com" style="color:#60a5fa; text-decoration:none">mysw786@gmail.com</a> | or Contact Us +923423944508</p>
-    </footer>
 </div>
 
 <div id="dashboard" class="hidden">
@@ -155,16 +143,6 @@
                 <div class="stat-box"><strong>Bonus</strong><br>Rs <span id="bonusPkr">0</span></div>
             </div>
         </div>
-
-        <div class="card" style="border: 1px solid #60a5fa;">
-            <h3><i class="fas fa-bullhorn"></i> Refer & Earn</h3>
-            <p style="font-size:12px; color:#94a3b8">Apne link se doston ko join karwayein. Pehle 3 par Rs 5 aur 4th par Rs 10 milein ge. (Limit: 4 Friends)</p>
-            <div id="refStats" style="font-weight:bold; margin-bottom:10px">Referrals: <span id="refCountText">0/4</span></div>
-            <div class="ref-box" id="refLinkDisplay">Generating link...</div>
-            <button onclick="copyRefLink()" style="background:#334155; padding:8px; font-size:12px; width:auto; margin-top:10px;">Copy Link</button>
-        </div>
-
-        <h4>Subscription & Video Tasks</h4>
         <div id="taskList">Loading tasks...</div>
     </div>
 </div>
@@ -173,7 +151,7 @@
     <div class="card" style="width:90%; max-width: 400px; position: relative;">
         <h3 style="margin:0 0 15px 0; color:#60a5fa; text-align:center;">Withdraw Funds</h3>
         
-        <label style="font-size: 12px; color:#aaa;">Select Payment Method</label>
+        <label style="font-size: 11px; color:#aaa;">Select Payment Method</label>
         <select id="wMethod">
             <option value="Easypaisa">Easypaisa</option>
             <option value="JazzCash">JazzCash</option>
@@ -196,7 +174,6 @@
 <div class="popup" id="linkPopup">
     <div class="card" style="width:90%; max-width: 400px;">
         <h4 style="margin:0">Submit Proof Link</h4>
-        <p style="font-size:12px; color:#aaa">Ibb.co par screenshot upload kar ke link yahan dein.</p>
         <input type="text" id="proofLink" placeholder="https://ibb.co/xxxxx">
         <button onclick="submitManualLink()" style="background:#28a745;">Submit For Review</button>
         <button onclick="linkPopup.style.display='none'" style="background:none; color:white">Cancel</button>
@@ -206,6 +183,7 @@
 <div class="popup" id="videoPopup"><div id="timerDisplay" style="color:#ffeb3b; font-size:24px; margin-bottom:10px;">18s</div><div id="player"></div></div>
 
 <script>
+// Firebase Config (Must be your correct config)
 const firebaseConfig = {
   apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ",
   authDomain: "own-live-steam-web.firebaseapp.com",
@@ -222,9 +200,6 @@ const rtdb = firebase.database();
 let currentSlot = "";
 let userDataGlobal = null;
 let currentTotalBalance = 0;
-
-const urlParams = new URLSearchParams(window.location.search);
-const referrerId = urlParams.get('ref');
 
 function toggleMenu() {
     document.getElementById("sidebar").classList.toggle("open");
@@ -252,24 +227,10 @@ function handleRegister() {
     const name = document.getElementById("rName").value;
     const email = document.getElementById("rEmail").value;
     const pass = document.getElementById("rPass").value;
-    if(!name || !email || pass.length < 6) return alert("All fields are required!");
+    if(!name || !email || pass.length < 6) return alert("All fields required!");
     auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-        const uid = cred.user.uid;
-        rtdb.ref('users/' + uid).set({
+        rtdb.ref('users/' + cred.user.uid).set({
             email: email, name: name, watch: 0, subPoints: 0, status: 'active', bonus: 0, withdrawnAmount: 0, referralCount: 0
-        }).then(() => {
-            if (referrerId && referrerId !== uid) {
-                const refPath = rtdb.ref('users/' + referrerId);
-                refPath.once('value', snapshot => {
-                    const refData = snapshot.val();
-                    if (refData && (refData.referralCount || 0) < 4) {
-                        let newCount = (refData.referralCount || 0) + 1;
-                        let reward = newCount <= 3 ? 5 : 10;
-                        refPath.update({ referralCount: newCount, bonus: (refData.bonus || 0) + reward });
-                    }
-                });
-            }
-            alert("Account created!");
         });
     }).catch(err => alert(err.message));
 }
@@ -286,9 +247,6 @@ auth.onAuthStateChanged(user => {
             userDataGlobal = snap.val() || {};
             document.getElementById("dashboard").classList.remove("hidden");
             document.getElementById("displayEmail").innerText = user.email;
-            const myRefLink = window.location.origin + window.location.pathname + "?ref=" + user.uid;
-            document.getElementById("refLinkDisplay").innerText = myRefLink;
-            document.getElementById("refCountText").innerText = (userDataGlobal.referralCount || 0) + "/4";
             renderDashboard();
         });
     } else { 
@@ -312,32 +270,19 @@ function renderDashboard() {
 
 async function loadTasks() {
     const compStr = userDataGlobal.completed || "";
-    const proofsObj = userDataGlobal.proofs || {};
     const list = document.getElementById("taskList");
     let html = "";
-    const cSnap = await db.collection("channels").get();
-    cSnap.forEach(doc => {
-        const c = doc.data(); const cid = "chan" + c.slot;
-        if(c.enabled && !compStr.includes(cid) && !proofsObj[cid]) {
-            html += `<div class="video-item" style="border-left:5px solid #28a745"><span>Sub Task ${c.slot}</span><button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#28a745">Subscribe</button></div>`;
-        }
-    });
     const vSnap = await db.collection("videos").get();
     vSnap.forEach(doc => {
         const v = doc.data(); const sid = "slot" + v.slot;
         if(v.enabled && !compStr.includes(sid)) {
-            html += `<div class="video-item"><span>Video Task ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
+            html += `<div class="video-item"><span>Video ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
         }
     });
-    list.innerHTML = html || "No tasks available right now!";
+    list.innerHTML = html || "No tasks available!";
 }
 
-function copyRefLink() {
-    const link = document.getElementById("refLinkDisplay").innerText;
-    navigator.clipboard.writeText(link).then(() => alert("Referral link copied!"));
-}
-
-// Withdrawal Logic Updates
+// WITHDRAWAL LOGIC (FIXED)
 function applyWithdraw() {
     if(currentTotalBalance < 100) return alert("Minimum withdrawal Rs 100!");
     document.getElementById("withdrawPopup").style.display = "flex";
@@ -350,11 +295,11 @@ function submitWithdrawRequest() {
     const amount = parseFloat(document.getElementById("wAmount").value);
     const name = document.getElementById("wName").value;
 
-    if(!number || !amount || !name) return alert("Tamam maloomat darj karein!");
+    if(!number || isNaN(amount) || !name) return alert("Tamam fields ko fill karein!");
+    if(amount < 100) return alert("Minimum withdrawal Rs 100 hai!");
     if(amount > currentTotalBalance) return alert("Aapka balance kam hai!");
-    if(amount < 100) return alert("Minimum Rs 100 withdraw kar sakte hain!");
 
-    const fullDetails = `Method: ${method} | Acc: ${number} | Name: ${name}`;
+    const fullDetails = `Method: ${method} | No: ${number} | Name: ${name}`;
     const reqId = Date.now();
 
     rtdb.ref('withdrawRequests/' + reqId).set({
@@ -364,18 +309,18 @@ function submitWithdrawRequest() {
         details: fullDetails, 
         status: 'pending'
     }).then(() => {
+        // Update user withdrawn amount
         rtdb.ref('users/' + auth.currentUser.uid).update({ 
             withdrawnAmount: (userDataGlobal.withdrawnAmount || 0) + amount 
         });
         document.getElementById("withdrawPopup").style.display = "none";
-        alert("Withdrawal request submitted successfully!");
-    });
+        alert("Request Bhej Di Gai Hai!");
+    }).catch(err => alert("Error: " + err.message));
 }
 
 function openLinkBox(link, cid) { window.open(link, '_blank'); currentSlot = cid; document.getElementById("linkPopup").style.display = "flex"; }
 function submitManualLink() {
     const val = document.getElementById("proofLink").value;
-    if(!val.includes("http")) return alert("Invalid link!");
     rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(val).then(() => {
         alert("Submitted!"); document.getElementById("linkPopup").style.display = "none";
     });
