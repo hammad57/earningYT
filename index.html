@@ -12,64 +12,56 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        :root { --primary: #1976d2; --dark: #1a1a1a; --success: #28a745; --light: #f0f2f5; }
-        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--light); overflow-x: hidden; color: #333; }
+        :root { --primary: #1976d2; --dark: #0f172a; --success: #28a745; --bg-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         
-        /* Sidebar Slide Menu */
+        body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg-gradient); color: #e2e8f0; min-height: 100vh; overflow-x: hidden; }
+        
+        /* Sidebar */
         #sidebar { 
-            width: 280px; background: var(--dark); color: white; height: 100vh; 
+            width: 280px; background: #1e293b; color: white; height: 100vh; 
             padding: 20px; position: fixed; left: -280px; top: 0; 
             box-sizing: border-box; overflow-y: auto; z-index: 2000; 
-            transition: 0.3s ease-in-out; box-shadow: 2px 0 10px rgba(0,0,0,0.3);
+            transition: 0.3s ease-in-out; border-right: 1px solid #334155;
         }
         #sidebar.open { left: 0; }
-        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1999; }
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1999; }
         #overlay.active { display: block; }
 
-        /* Landing Page Styles */
-        #landingPage { width: 100%; background: white; }
-        .hero { background: linear-gradient(135deg, #1976d2 0%, #0d47a1 100%); color: white; padding: 80px 20px; text-align: center; }
-        .hero h1 { font-size: 3rem; margin-bottom: 10px; }
-        .hero p { font-size: 1.2rem; opacity: 0.9; margin-bottom: 30px; }
-        .btn-main { background: #ffc107; color: #333; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        /* Landing Page */
+        #landingPage { width: 100%; }
+        .hero { background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=1200'); background-size: cover; color: white; padding: 100px 20px; text-align: center; }
+        .btn-main { background: #ffc107; color: #333; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; transition: 0.3s; }
+        .btn-main:hover { transform: scale(1.05); background: #ffca2c; }
 
-        .section-title { text-align: center; margin: 50px 0 30px; font-size: 2rem; color: var(--primary); }
         .container { max-width: 1100px; margin: auto; padding: 20px; }
+        .section-title { text-align: center; margin: 50px 0 30px; font-size: 2rem; color: #60a5fa; }
         
-        /* Features Section */
+        .feat-card { background: #1e293b; padding: 30px; border-radius: 15px; text-align: center; border: 1px solid #334155; }
         .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .feat-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); text-align: center; border-bottom: 4px solid var(--primary); }
-        .feat-card i { font-size: 3rem; color: var(--primary); margin-bottom: 15px; }
 
-        /* Proofs Section */
-        .proofs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .proof-item { background: #fff; padding: 10px; border-radius: 10px; border: 1px solid #ddd; }
-        .proof-item img { width: 100%; border-radius: 8px; height: 200px; object-fit: cover; }
-        .proof-name { font-weight: bold; margin-top: 10px; display: block; text-align: center; }
-
+        /* Proofs */
+        .proof-item { background: #1e293b; padding: 15px; border-radius: 10px; border: 1px solid #334155; }
+        .proof-item img { width: 100%; border-radius: 8px; height: 180px; object-fit: cover; }
+        
         /* Payment Methods */
-        .pay-methods { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; padding: 20px; background: #eee; border-radius: 15px; }
-        .pay-card { background: white; padding: 10px 20px; border-radius: 8px; font-weight: bold; border: 1px solid #ccc; display: flex; align-items: center; gap: 10px; }
-        .pay-card i { color: #28a745; }
+        .pay-methods { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-top: 20px; }
+        .pay-card { background: #334155; padding: 10px 20px; border-radius: 8px; font-weight: bold; }
 
-        /* Help Section */
-        .help-section { background: var(--dark); color: white; padding: 50px 20px; border-radius: 20px 20px 0 0; }
-        .faq { max-width: 700px; margin: auto; }
-        .faq-item { margin-bottom: 15px; background: #333; padding: 15px; border-radius: 8px; }
+        /* Dashboard UI */
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-bottom: 20px; border: 1px solid #334155; }
+        .top-bar { background: #1e293b; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; }
+        
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; }
+        button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; background: var(--primary); color: white; }
+        
+        .video-item { background: #1e293b; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary); }
+        .stat-box { background: #334155; padding: 15px; border-radius: 10px; flex: 1; text-align: center; cursor: pointer; }
 
-        /* Dashboard Styles */
-        #main-container { width: 100%; box-sizing: border-box; transition: 0.3s; }
-        .top-bar { background: #fff; padding: 10px 20px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px; border-radius: 8px; }
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 15px; text-align: center; }
-        .auth-tabs { display: flex; margin-bottom: 20px; border-bottom: 2px solid #eee; }
-        .tab-btn { flex: 1; padding: 10px; cursor: pointer; border: none; background: none; font-weight: bold; color: #888; }
-        .tab-btn.active { color: #1976d2; border-bottom: 2px solid #1976d2; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; border: none; background: var(--primary); color: white; }
-        .stat-box { cursor: pointer; padding: 10px; border-radius: 8px; transition: background 0.3s; flex: 1; border: 1px solid #eee; }
-        .video-item { background: white; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .hidden { display: none !important; }
-        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 20px; }
+        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; }
+
+        /* Referral Link Styling */
+        .ref-box { background: #0f172a; border: 1px dashed #60a5fa; padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 10px; word-break: break-all; }
     </style>
 </head>
 <body>
@@ -78,163 +70,118 @@
 
 <div id="sidebar">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="color: #1976d2; margin: 0;">My Profile</h3>
-        <button onclick="toggleMenu()" style="width: auto; background: none; color: white; font-size: 20px; margin: 0;">×</button>
+        <h3 style="color: #60a5fa; margin: 0;">Account Profile</h3>
+        <button onclick="toggleMenu()" style="width: auto; background: none; color: white; font-size: 20px;">×</button>
     </div>
-    <hr style="border: 0.5px solid #444; margin: 15px 0;">
-    <div class="sidebar-card"><label style="font-size:10px; color:#aaa">Email</label><div id="displayEmail">...</div></div>
-    <div class="sidebar-card">
-        <label style="font-size:10px; color:#aaa">Balance (PKR)</label>
+    <hr style="border: 0.5px solid #334155; margin: 15px 0;">
+    <div style="padding:10px; background:#0f172a; border-radius:8px; margin-bottom:15px;">
+        <label style="font-size:10px; color:#94a3b8">Email Address</label>
+        <div id="displayEmail" style="font-size:14px">...</div>
+    </div>
+    <div style="padding:10px; background:#0f172a; border-radius:8px; margin-bottom:15px; border-left: 4px solid #28a745;">
+        <label style="font-size:10px; color:#94a3b8">Total Balance</label>
         <div style="font-size:22px; font-weight:bold; color:#28a745">Rs <span id="totalBalance">0.00</span></div>
-        <button onclick="applyWithdraw()" style="background:#28a745;">Withdraw Funds</button>
+        <button onclick="applyWithdraw()" style="background:#28a745; margin-top:10px;">Withdraw Now</button>
     </div>
-    <button onclick="auth.signOut()" style="background:#d32f2f; margin-top: 50px;">Logout</button>
+    <button onclick="auth.signOut()" style="background:#ef4444; margin-top: 30px;">Sign Out</button>
 </div>
 
 <div id="landingPage">
     <div class="hero">
-        <h1>Smart Earn (Pakistani Platform)</h1>
-        <p>Ghar baithay videos dekhein aur rozana Rs 500-1000 kamayein.</p>
-        <a href="#authBox" class="btn-main">Abhi Shuru Karein</a>
+        <h1 style="font-size:3.5rem; margin:0">Smart Earn</h1>
+        <p style="font-size:1.2rem; color:#cbd5e1; margin: 20px 0 40px;">Pakistan's Professional Watch & Earn Platform</p>
+        <a href="#authBox" class="btn-main">Get Started Now</a>
     </div>
 
     <div class="container">
-        <h2 class="section-title">App Details & How it Works</h2>
+        <h2 class="section-title">How to Earn Money?</h2>
         <div class="features">
-            <div class="feat-card">
-                <i class="fab fa-youtube"></i>
-                <h3>Watch & Earn</h3>
-                <p>Sirf 18 seconds ki videos dekhein aur foran apne wallet mein paise payein.</p>
-            </div>
-            <div class="feat-card">
-                <i class="fas fa-user-plus"></i>
-                <h3>Subscribe Task</h3>
-                <p>Channels ko subscribe karein aur high paying tasks mukammal karein.</p>
-            </div>
-            <div class="feat-card">
-                <i class="fas fa-bolt"></i>
-                <h3>Fast Withdraw</h3>
-                <p>Jab Rs 100 ho jayein, foran apne JazzCash ya EasyPaisa mein nikalwein.</p>
-            </div>
+            <div class="feat-card"><i class="fab fa-youtube" style="font-size:2rem; color:#ef4444"></i><h3>Watch Videos</h3><p>Simple 18-second videos dekhein aur foran earning karein.</p></div>
+            <div class="feat-card"><i class="fas fa-users" style="font-size:2rem; color:#60a5fa"></i><h3>Refer Friends</h3><p>Apne doston ko join karwayein aur Rs 10 tak per referral kamayein.</p></div>
+            <div class="feat-card"><i class="fas fa-check-circle" style="font-size:2rem; color:#22c55e"></i><h3>Daily Withdraw</h3><p>Easypaisa aur Jazzcash mein daily payments hasil karein.</p></div>
         </div>
 
-        <h2 class="section-title">Withdrawal Proofs (Latest)</h2>
-        <div class="proofs-grid">
-            <div class="proof-item">
-                <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&q=80&w=400" alt="Proof">
-                <span class="proof-name">Ahmed Khan - Rs 1200</span>
-            </div>
-            <div class="proof-item">
-                <img src="https://images.unsplash.com/photo-1580519542036-c47de6196ba5?auto=format&fit=crop&q=80&w=400" alt="Proof">
-                <span class="proof-name">Sara Bibi - Rs 500</span>
-            </div>
-            <div class="proof-item">
-                <img src="https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?auto=format&fit=crop&q=80&w=400" alt="Proof">
-                <span class="proof-name">Zeeshan Ali - Rs 2500</span>
-            </div>
+        <h2 class="section-title">Latest Withdrawal Proofs</h2>
+        <div class="features">
+            <div class="proof-item"><img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400" alt="Proof"><span style="display:block; text-align:center; margin-top:10px;">Ali Raza - Rs 850</span></div>
+            <div class="proof-item"><img src="https://images.unsplash.com/photo-1580519542036-c47de6196ba5?w=400" alt="Proof"><span style="display:block; text-align:center; margin-top:10px;">Mehak - Rs 1400</span></div>
+            <div class="proof-item"><img src="https://images.unsplash.com/photo-1616077168079-7e09a677fb2c?w=400" alt="Proof"><span style="display:block; text-align:center; margin-top:10px;">Sajid Khan - Rs 500</span></div>
         </div>
 
-        <h2 class="section-title">Supported Payment Methods</h2>
+        <h2 class="section-title">Payment Methods</h2>
         <div class="pay-methods">
-            <div class="pay-card"><i class="fas fa-check-circle"></i> EasyPaisa</div>
-            <div class="pay-card"><i class="fas fa-check-circle"></i> JazzCash</div>
-            <div class="pay-card"><i class="fas fa-check-circle"></i> All Local Banks</div>
-            <div class="pay-card"><i class="fas fa-check-circle"></i> NayaPay</div>
-            <div class="pay-card"><i class="fas fa-check-circle"></i> Zindagi App</div>
+            <div class="pay-card">Easypaisa</div><div class="pay-card">JazzCash</div><div class="pay-card">NayaPay</div><div class="pay-card">Zindagi</div><div class="pay-card">Bank Transfer</div>
         </div>
     </div>
 
-    <div id="authBox" class="card" style="max-width: 450px; margin: 50px auto; padding: 40px;">
-        <h2 style="color:var(--primary)">Join Smart Earn</h2>
-        <p>Login ya Register karein kaam shuru karne ke liye</p>
+    <div id="authBox" class="card" style="max-width: 450px; margin: 80px auto; padding: 30px;">
+        <h2 style="text-align:center; color:#60a5fa">Join Community</h2>
         <button style="background: #db4437; margin-bottom: 20px;" onclick="loginWithGoogle()"><i class="fab fa-google"></i> Login with Google</button>
-        
         <div class="auth-tabs">
-            <button id="tabLogin" class="tab-btn active" onclick="switchAuth('login')">Login</button>
-            <button id="tabRegister" class="tab-btn" onclick="switchAuth('register')">Register</button>
+            <button id="tabLogin" class="tab-btn active" onclick="switchAuth('login')" style="color:white; flex:1; border-bottom:2px solid #60a5fa; padding:10px">Login</button>
+            <button id="tabRegister" class="tab-btn" onclick="switchAuth('register')" style="color:#94a3b8; flex:1; padding:10px">Register</button>
         </div>
-
         <div id="loginForm">
             <input id="lEmail" placeholder="Email Address">
             <input id="lPass" type="password" placeholder="Password">
-            <button onclick="handleLogin()">Login Account</button>
+            <button onclick="handleLogin()">Sign In</button>
         </div>
-
         <div id="registerForm" class="hidden">
             <input id="rName" placeholder="Full Name">
             <input id="rEmail" placeholder="Email Address">
-            <input id="rPass" type="password" placeholder="Create Password">
-            <button onclick="handleRegister()" style="background: var(--success);">Create Free Account</button>
+            <input id="rPass" type="password" placeholder="Password (Min 6)">
+            <button onclick="handleRegister()" style="background: var(--success);">Create Account</button>
         </div>
     </div>
 
-    <div class="help-section">
-        <div class="container">
-            <h2 style="text-align:center">Help & Support</h2>
-            <div class="faq">
-                <div class="faq-item"><strong>Q: Minimum withdraw kitna hai?</strong><br>A: Aap kam se kam Rs 100 nikalwa sakte hain.</div>
-                <div class="faq-item"><strong>Q: Payment kitni dair mein milti hai?</strong><br>A: Withdraw request ke 24 ghanton ke andar payment mil jati hai.</div>
-                <div class="faq-item"><strong>Q: Kya ye app free hai?</strong><br>A: Jee haan, ye bilkul free platform hai.</div>
-            </div>
-            <p style="text-align:center; margin-top:30px; opacity:0.7">Email: support@smartearn.com | Made in Pakistan</p>
-        </div>
-    </div>
+    <footer style="text-align:center; padding: 50px 20px; background: #0f172a;">
+        <p>Support: <a href="mailto:mysw786@gmail.com" style="color:#60a5fa; text-decoration:none">support@smartearn.com</a> | Made in Pakistan</p>
+    </footer>
 </div>
 
 <div id="dashboard" class="hidden">
-    <div id="main-container">
-        <div class="top-bar">
-            <button class="menu-btn" onclick="toggleMenu()" style="background:none; border:none; font-size:20px; cursor:pointer">☰ Menu</button>
-            <div style="font-weight: bold; color: #1976d2;">Dashboard</div>
-        </div>
-
-        <div class="container">
-            <div class="card">
-                <h3>Earnings Overview</h3>
-                <div style="display:flex; justify-content:space-between; gap: 10px;">
-                    <div class="stat-box" onclick="toggleHistory('watchHistory')">
-                        <strong>Watch</strong><br>Rs <span id="watchPkr">0</span>
-                        <div id="watchHistory" style="display:none; font-size:12px; margin-top:5px;"></div>
-                    </div>
-                    <div class="stat-box" onclick="toggleHistory('subHistory')">
-                        <strong>Subs</strong><br>Rs <span id="subPkr">0</span>
-                        <div id="subHistory" style="display:none; font-size:12px; margin-top:5px;"></div>
-                    </div>
-                    <div class="stat-box" onclick="toggleHistory('bonusHistory')">
-                        <strong>Bonus</strong><br>Rs <span id="bonusPkr">0</span>
-                        <div id="bonusHistory" style="display:none; font-size:12px; margin-top:5px;"></div>
-                    </div>
-                </div>
-            </div>
-            <h4>Available New Tasks</h4>
-            <div id="taskList">Loading tasks...</div>
-        </div>
+    <div class="top-bar">
+        <button onclick="toggleMenu()" style="background:none; color:white; font-size:22px; cursor:pointer; width:auto">☰</button>
+        <div style="font-weight: bold; color: #60a5fa;">Member Dashboard</div>
+        <div id="userBalanceHead" style="color:#28a745; font-weight:bold;">Rs 0.00</div>
     </div>
-</div>
 
-<div id="disableContent" class="hidden">
-    <div style="text-align: center; padding: 30px; background: white; border-radius: 15px; max-width: 400px; margin: 100px auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
-        <h2 style="color:red">Account Disabled</h2>
-        <p>Admin ne aapka account arzi tor par band kar diya hai.</p>
-        <button id="reopenBtn" onclick="sendReopenRequest()" style="background: orange; color:black">Reopen Request Bhejo</button>
-        <p id="reqSentMsg" style="color:green; font-weight:bold; margin-top:15px;" class="hidden">✓ Request sent! Admin review karega.</p>
-        <button onclick="auth.signOut()" style="background:#888; margin-top:20px">Logout</button>
+    <div class="container">
+        <div class="card">
+            <h3>Earnings Statistics</h3>
+            <div style="display:flex; justify-content:space-between; gap: 10px;">
+                <div class="stat-box" onclick="toggleHistory('watchHistory')"><strong>Watch</strong><br>Rs <span id="watchPkr">0</span></div>
+                <div class="stat-box" onclick="toggleHistory('subHistory')"><strong>Subs</strong><br>Rs <span id="subPkr">0</span></div>
+                <div class="stat-box" onclick="toggleHistory('bonusHistory')"><strong>Bonus</strong><br>Rs <span id="bonusPkr">0</span></div>
+            </div>
+        </div>
+
+        <div class="card" style="border: 1px solid #60a5fa;">
+            <h3><i class="fas fa-bullhorn"></i> Refer & Earn</h3>
+            <p style="font-size:12px; color:#94a3b8">Apne link se doston ko join karwayein. Pehle 3 par Rs 5 aur 4th par Rs 10 milein ge. (Limit: 4 Friends)</p>
+            <div id="refStats" style="font-weight:bold; margin-bottom:10px">Referrals: <span id="refCountText">0/4</span></div>
+            <div class="ref-box" id="refLinkDisplay">Generating link...</div>
+            <button onclick="copyRefLink()" style="background:#334155; padding:8px; font-size:12px; width:auto; margin-top:10px;">Copy Link</button>
+        </div>
+
+        <h4>Subscription & Video Tasks</h4>
+        <div id="taskList">Loading tasks...</div>
     </div>
 </div>
 
 <div class="popup" id="linkPopup">
     <div class="card" style="width:90%; max-width: 400px;">
-        <h4>Submit Proof Link</h4>
+        <h4 style="margin:0">Submit Proof Link</h4>
+        <p style="font-size:12px; color:#aaa">Ibb.co par screenshot upload kar ke link yahan dein.</p>
         <input type="text" id="proofLink" placeholder="https://ibb.co/xxxxx">
         <button onclick="submitManualLink()" style="background:#28a745;">Submit For Review</button>
-        <button onclick="linkPopup.style.display='none'" style="background:#888;">Cancel</button>
+        <button onclick="linkPopup.style.display='none'" style="background:none; color:white">Cancel</button>
     </div>
 </div>
 
 <div class="popup" id="videoPopup"><div id="timerDisplay" style="color:#ffeb3b; font-size:24px; margin-bottom:10px;">18s</div><div id="player"></div></div>
 
 <script>
-// Firebase Config (Aapki original config)
 const firebaseConfig = {
   apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ",
   authDomain: "own-live-steam-web.firebaseapp.com",
@@ -252,6 +199,10 @@ let currentSlot = "";
 let userDataGlobal = null;
 let currentTotalBalance = 0;
 
+// URL Referral Detection
+const urlParams = new URLSearchParams(window.location.search);
+const referrerId = urlParams.get('ref');
+
 function toggleMenu() {
     document.getElementById("sidebar").classList.toggle("open");
     document.getElementById("overlay").classList.toggle("active");
@@ -261,13 +212,9 @@ function switchAuth(mode) {
     if(mode === 'login') {
         document.getElementById("loginForm").classList.remove("hidden");
         document.getElementById("registerForm").classList.add("hidden");
-        document.getElementById("tabLogin").classList.add("active");
-        document.getElementById("tabRegister").classList.remove("active");
     } else {
         document.getElementById("loginForm").classList.add("hidden");
         document.getElementById("registerForm").classList.remove("hidden");
-        document.getElementById("tabLogin").classList.remove("active");
-        document.getElementById("tabRegister").classList.add("active");
     }
 }
 
@@ -275,24 +222,44 @@ function handleLogin() {
     const email = document.getElementById("lEmail").value;
     const pass = document.getElementById("lPass").value;
     if(!email || !pass) return alert("Email aur Password likhein!");
-    auth.signInWithEmailAndPassword(email, pass).catch(err => alert("Login Fail: " + err.message));
+    auth.signInWithEmailAndPassword(email, pass).catch(err => alert(err.message));
 }
 
 function handleRegister() {
     const name = document.getElementById("rName").value;
     const email = document.getElementById("rEmail").value;
     const pass = document.getElementById("rPass").value;
-    if(!name || !email || pass.length < 6) return alert("Tamam fields bharein!");
+    
+    if(!name || !email || pass.length < 6) return alert("All fields are required!");
+
     auth.createUserWithEmailAndPassword(email, pass).then(cred => {
-        rtdb.ref('users/' + cred.user.uid).set({
-            email: email, name: name, watch: 0, subPoints: 0, status: 'active', bonus: 0, withdrawnAmount: 0
-        }).then(() => alert("Account ban gaya!"));
-    }).catch(err => alert("Error: " + err.message));
+        const uid = cred.user.uid;
+        rtdb.ref('users/' + uid).set({
+            email: email, name: name, watch: 0, subPoints: 0, status: 'active', bonus: 0, withdrawnAmount: 0, referralCount: 0
+        }).then(() => {
+            // Processing Referral Reward
+            if (referrerId && referrerId !== uid) {
+                const refPath = rtdb.ref('users/' + referrerId);
+                refPath.once('value', snapshot => {
+                    const refData = snapshot.val();
+                    if (refData && (refData.referralCount || 0) < 4) {
+                        let newCount = (refData.referralCount || 0) + 1;
+                        let reward = newCount <= 3 ? 5 : 10;
+                        refPath.update({
+                            referralCount: newCount,
+                            bonus: (refData.bonus || 0) + reward
+                        });
+                    }
+                });
+            }
+            alert("Account created!");
+        });
+    }).catch(err => alert(err.message));
 }
 
 function loginWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(error => alert(error.message));
+    auth.signInWithPopup(provider).catch(e => alert(e.message));
 }
 
 auth.onAuthStateChanged(user => {
@@ -300,24 +267,23 @@ auth.onAuthStateChanged(user => {
         document.getElementById("landingPage").classList.add("hidden"); 
         rtdb.ref('users/' + user.uid).on('value', snap => {
             userDataGlobal = snap.val() || {};
-            if(userDataGlobal.status === "disabled") {
-                document.getElementById("dashboard").classList.add("hidden");
-                document.getElementById("disableContent").classList.remove("hidden");
-            } else {
-                document.getElementById("disableContent").classList.add("hidden");
-                document.getElementById("dashboard").classList.remove("hidden");
-                document.getElementById("displayEmail").innerText = user.email;
-                renderDashboard(user.uid);
-            }
+            document.getElementById("dashboard").classList.remove("hidden");
+            document.getElementById("displayEmail").innerText = user.email;
+            
+            // Referral UI Update
+            const myRefLink = window.location.origin + window.location.pathname + "?ref=" + user.uid;
+            document.getElementById("refLinkDisplay").innerText = myRefLink;
+            document.getElementById("refCountText").innerText = (userDataGlobal.referralCount || 0) + "/4";
+            
+            renderDashboard();
         });
     } else { 
         document.getElementById("landingPage").classList.remove("hidden"); 
         document.getElementById("dashboard").classList.add("hidden"); 
-        document.getElementById("sidebar").classList.remove("open");
     }
 });
 
-function renderDashboard(uid) {
+function renderDashboard() {
     let watchAmt = (userDataGlobal.watch || 0) * 0.38;
     let subAmt = (userDataGlobal.subPoints || 0) * 0.60;
     let bonusAmt = (userDataGlobal.bonus || 0);
@@ -327,20 +293,18 @@ function renderDashboard(uid) {
     document.getElementById("subPkr").innerText = subAmt.toFixed(2);
     document.getElementById("bonusPkr").innerText = bonusAmt.toFixed(2);
     document.getElementById("totalBalance").innerText = currentTotalBalance.toFixed(2);
+    document.getElementById("userBalanceHead").innerText = "Rs " + currentTotalBalance.toFixed(2);
     
-    loadTasks(userDataGlobal.completed || "", userDataGlobal.proofs || {});
+    loadTasks();
 }
 
-async function loadTasks(compStr, proofsObj) {
+async function loadTasks() {
+    const compStr = userDataGlobal.completed || "";
+    const proofsObj = userDataGlobal.proofs || {};
     const list = document.getElementById("taskList");
     let html = "";
-    const vSnap = await db.collection("videos").get();
-    vSnap.forEach(doc => {
-        const v = doc.data(); const sid = "slot" + v.slot;
-        if(v.enabled && !compStr.includes(sid)) {
-            html += `<div class="video-item"><span>Video Task ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
-        }
-    });
+    
+    // Youtube Subs Tasks (Restored)
     const cSnap = await db.collection("channels").get();
     cSnap.forEach(doc => {
         const c = doc.data(); const cid = "chan" + c.slot;
@@ -348,36 +312,45 @@ async function loadTasks(compStr, proofsObj) {
             html += `<div class="video-item" style="border-left:5px solid #28a745"><span>Sub Task ${c.slot}</span><button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#28a745">Subscribe</button></div>`;
         }
     });
-    list.innerHTML = html || "No tasks available!";
+
+    // Video Tasks
+    const vSnap = await db.collection("videos").get();
+    vSnap.forEach(doc => {
+        const v = doc.data(); const sid = "slot" + v.slot;
+        if(v.enabled && !compStr.includes(sid)) {
+            html += `<div class="video-item"><span>Video Task ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
+        }
+    });
+    
+    list.innerHTML = html || "No tasks available right now!";
+}
+
+function copyRefLink() {
+    const link = document.getElementById("refLinkDisplay").innerText;
+    navigator.clipboard.writeText(link).then(() => alert("Referral link copied!"));
 }
 
 function applyWithdraw() {
-    if(currentTotalBalance < 100) return alert("Minimum withdrawal Rs 100 hai!");
-    const walletInfo = prompt("Apna JazzCash/EasyPaisa number aur naam likhein:");
-    if(!walletInfo) return;
+    if(currentTotalBalance < 100) return alert("Minimum withdrawal Rs 100!");
+    const info = prompt("Enter JazzCash/EasyPaisa details:");
+    if(!info) return;
     const reqId = Date.now();
     rtdb.ref('withdrawRequests/' + reqId).set({
         uid: auth.currentUser.uid, email: auth.currentUser.email,
-        amount: currentTotalBalance, details: walletInfo, status: 'pending', timestamp: reqId
+        amount: currentTotalBalance, details: info, status: 'pending'
     }).then(() => {
-        const newWithdrawn = (userDataGlobal.withdrawnAmount || 0) + currentTotalBalance;
-        rtdb.ref('users/' + auth.currentUser.uid).update({ withdrawnAmount: newWithdrawn });
-        alert("Withdrawal request bhej di gayi hai!");
+        rtdb.ref('users/' + auth.currentUser.uid).update({ withdrawnAmount: (userDataGlobal.withdrawnAmount || 0) + currentTotalBalance });
+        alert("Withdrawal request submitted!");
     });
 }
 
-function toggleHistory(id) {
-    const el = document.getElementById(id);
-    el.style.display = el.style.display === "none" ? "block" : "none";
-}
-
 function openLinkBox(link, cid) { window.open(link, '_blank'); currentSlot = cid; document.getElementById("linkPopup").style.display = "flex"; }
+
 function submitManualLink() {
-    const linkVal = document.getElementById("proofLink").value;
-    if(!linkVal.includes("http")) return alert("Link sahi nahi hai!");
-    rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(linkVal).then(() => {
-        alert("Submitted!");
-        document.getElementById("linkPopup").style.display = "none";
+    const val = document.getElementById("proofLink").value;
+    if(!val.includes("http")) return alert("Invalid link!");
+    rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(val).then(() => {
+        alert("Submitted!"); document.getElementById("linkPopup").style.display = "none";
     });
 }
 
