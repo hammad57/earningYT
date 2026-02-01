@@ -13,7 +13,7 @@
         :root { --primary: #1976d2; --dark: #0f172a; --sidebar-w: 240px; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f7fe; display: flex; }
         #sidebar { width: var(--sidebar-w); background: var(--dark); color: white; height: 100vh; position: fixed; overflow-y: auto; }
-        .nav-link { padding: 15px 20px; display: block; color: #cbd5e1; text-decoration: none; border-bottom: 1px solid #1e293b; cursor: pointer; }
+        .nav-link { padding: 15px 20px; display: block; color: #cbd5e1; text-decoration: none; border-bottom: 1px solid #1e293b; }
         #main { flex: 1; margin-left: var(--sidebar-w); padding: 20px; width: calc(100% - var(--sidebar-w)); }
         .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .grid-task { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
@@ -24,8 +24,7 @@
         .btn-blue { background: #3b82f6; color: white; }
         .hidden { display: none !important; }
         input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        table { width:100%; border-collapse:collapse; }
-        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
+        #modal { position: fixed; top: 10%; left: 30%; width: 40%; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 0 50px rgba(0,0,0,0.5); z-index: 2000; }
     </style>
 </head>
 <body>
@@ -40,44 +39,51 @@
 <div id="adminContent" class="hidden">
     <div id="sidebar">
         <div style="padding:20px; text-align:center; font-weight:bold;">SMART ADMIN</div>
-        <a class="nav-link" onclick="showSection('tasks')">Video Tasks</a>
-        <a class="nav-link" onclick="showSection('promos')">Promotion Requests</a>
-        <a class="nav-link" onclick="showSection('viral')">User Viral Links (NEW)</a>
-        <a class="nav-link" onclick="showSection('users')">User Management</a>
-        <a class="nav-link" onclick="showSection('withdraw')">Withdrawals</a>
+        <a href="#tasks" class="nav-link">Video/Channel Tasks</a>
+        <a href="#promos" class="nav-link">Promotion Requests</a>
+        <a href="#users" class="nav-link">User Management</a>
+        <a href="#withdraw" class="nav-link">Withdrawals</a>
         <div style="padding:20px;"><button onclick="auth.signOut()" class="btn btn-red" style="width:100%">Logout</button></div>
     </div>
 
     <div id="main">
         <section id="tasks" class="card">
             <h3>Manage Platform Tasks</h3>
+            <h4>Video Slots (1-10)</h4>
             <div class="grid-task" id="videoSlots"></div>
+            <h4 style="margin-top:20px;">Channel Slots (1-5)</h4>
+            <div class="grid-task" id="channelSlots"></div>
         </section>
 
-        <section id="promos" class="card hidden">
+        <section id="promos" class="card">
             <h3>Pending Promotion Orders</h3>
-            <tbody id="promoList"></tbody>
-        </section>
-
-        <section id="viral" class="card hidden">
-            <h3>User Submitted Viral Links</h3>
-            <p>Copy these links and add them to the Task Slots above.</p>
-            <table style="width:100%;">
-                <thead><tr><th>User Email</th><th>Links (Click to Copy)</th><th>Action</th></tr></thead>
-                <tbody id="viralList"></tbody>
+            <table style="width:100%; border-collapse:collapse;">
+                <thead><tr><th>User</th><th>Package</th><th>TRX</th><th>Action</th></tr></thead>
+                <tbody id="promoList"></tbody>
             </table>
         </section>
 
-        <section id="users" class="card hidden">
+        <section id="users" class="card">
             <h3>User List</h3>
-            <tbody id="usersList"></tbody>
+            <table style="width:100%; border-collapse:collapse;">
+                <thead><tr><th>Email</th><th>Balance</th><th>Action</th></tr></thead>
+                <tbody id="usersList"></tbody>
+            </table>
         </section>
 
-        <section id="withdraw" class="card hidden">
+        <section id="withdraw" class="card">
             <h3>Pending Withdrawals</h3>
-            <tbody id="withdrawList"></tbody>
+            <table style="width:100%; border-collapse:collapse;">
+                <tbody id="withdrawList"></tbody>
+            </table>
         </section>
     </div>
+</div>
+
+<div id="modal" class="hidden">
+    <h3 id="modalTitle">User Links</h3>
+    <div id="modalBody" style="max-height:300px; overflow-y:auto;"></div>
+    <button class="btn btn-red" onclick="document.getElementById('modal').classList.add('hidden')">Close</button>
 </div>
 
 <script>
@@ -89,18 +95,14 @@ auth.onAuthStateChanged(u => {
     if(u) {
         document.getElementById("authBox").classList.add("hidden");
         document.getElementById("adminContent").classList.remove("hidden");
-        initTaskSlots(); loadPromos(); loadUsers(); loadWithdrawRequests(); loadViralRequests();
+        initTaskSlots(); loadPromos(); loadUsers(); loadWithdrawRequests();
     } else {
         document.getElementById("authBox").classList.remove("hidden");
         document.getElementById("adminContent").classList.add("hidden");
     }
 });
 
-function showSection(id) {
-    document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
-    document.getElementById(id).classList.remove("hidden");
-}
-
+// Restore Task Slots logic
 function initTaskSlots() {
     const vContainer = document.getElementById("videoSlots"); vContainer.innerHTML = "";
     for(let i=1; i<=10; i++) {
@@ -110,57 +112,83 @@ function initTaskSlots() {
         </div>`;
         db.collection("videos").doc("slot"+i).get().then(s => { if(s.exists) document.getElementById("v"+i).value = s.data().link; });
     }
+    const cContainer = document.getElementById("channelSlots"); cContainer.innerHTML = "";
+    for(let i=1; i<=5; i++) {
+        cContainer.innerHTML += `<div class="task-box">
+            Chan ${i} <input id="c${i}" placeholder="Channel Link">
+            <button class="btn btn-blue" onclick="saveC(${i})">Save</button>
+        </div>`;
+        db.collection("channels").doc("chan"+i).get().then(s => { if(s.exists) document.getElementById("c"+i).value = s.data().link; });
+    }
 }
 function saveV(n){ db.collection("videos").doc("slot"+n).set({slot:n, link:document.getElementById("v"+n).value, enabled:true}).then(()=>alert("Saved")); }
+function saveC(n){ db.collection("channels").doc("chan"+n).set({slot:n, link:document.getElementById("c"+n).value, enabled:true}).then(()=>alert("Saved")); }
 
 function loadPromos() {
     rtdb.ref('promotionRequests').on('value', snap => {
-        const list = document.getElementById("promoList"); list.innerHTML = "<table><tr><th>Email</th><th>Package</th><th>Action</th></tr>";
+        const list = document.getElementById("promoList"); list.innerHTML = "";
         snap.forEach(child => {
             const r = child.val();
-            list.innerHTML += `<tr><td>${r.email}</td><td>${r.package}</td>
-            <td><button class="btn btn-green" onclick="rtdb.ref('promotionRequests/${child.key}').remove()">Done</button></td></tr>`;
+            list.innerHTML += `<tr>
+                <td>${r.email}</td><td>${r.package}</td><td>${r.trxId}</td>
+                <td>
+                    <button class="btn btn-green" onclick="approvePromo('${child.key}', '${r.uid}', '${r.package}')">Approve</button>
+                    <button class="btn btn-red" onclick="rtdb.ref('promotionRequests/${child.key}').remove()">Reject</button>
+                </td>
+            </tr>`;
         });
-        list.innerHTML += "</table>";
     });
+}
+
+function approvePromo(key, uid, pkg) {
+    const expiry = new Date(); expiry.setDate(expiry.getDate() + 30);
+    rtdb.ref('activeSubscriptions/' + uid).set({ package: pkg, expiryDate: expiry.toISOString(), status: 'active' });
+    rtdb.ref('promotionRequests/' + key).remove().then(() => alert("Approved for 30 days!"));
 }
 
 function loadUsers() {
     rtdb.ref('users').on('value', snap => {
-        const list = document.getElementById("usersList"); list.innerHTML = "<table>";
+        const list = document.getElementById("usersList"); list.innerHTML = "";
         snap.forEach(child => {
             const u = child.val();
-            list.innerHTML += `<tr><td>${u.email}</td><td>Rs ${u.bonus||0}</td></tr>`;
+            list.innerHTML += `<tr><td>${u.email}</td><td>Rs ${u.bonus||0}</td>
+            <td><button class="btn btn-blue" onclick="viewUserLinks('${child.key}')">View Links</button></td></tr>`;
         });
-        list.innerHTML += "</table>";
     });
+}
+
+function viewUserLinks(uid) {
+    const modal = document.getElementById("modal");
+    const body = document.getElementById("modalBody");
+    modal.classList.remove("hidden");
+    body.innerHTML = "Loading...";
+    rtdb.ref('userSubmittedLinks/' + uid).on('value', snap => {
+        const data = snap.val(); body.innerHTML = "";
+        if(!data) { body.innerHTML = "No links."; return; }
+        ['video', 'channel'].forEach(type => {
+            if(data[type+'s']) {
+                Object.keys(data[type+'s']).forEach(key => {
+                    const item = data[type+'s'][key];
+                    body.innerHTML += `<div style="border-bottom:1px solid #ddd; padding:5px;">
+                        <p style="font-size:11px;">${item.url}</p>
+                        <button class="btn ${item.status==='Task Added'?'btn-red':'btn-green'}" onclick="toggleLinkStatus('${uid}', '${type}s', '${key}', '${item.status}')">${item.status}</button>
+                    </div>`;
+                });
+            }
+        });
+    });
+}
+
+function toggleLinkStatus(uid, path, key, current) {
+    const next = current === 'Task Added' ? 'pending' : 'Task Added';
+    rtdb.ref(`userSubmittedLinks/${uid}/${path}/${key}`).update({ status: next });
 }
 
 function loadWithdrawRequests() {
     rtdb.ref('withdrawRequests').on('value', snap => {
-        const list = document.getElementById("withdrawList"); list.innerHTML = "<table>";
+        const list = document.getElementById("withdrawList"); list.innerHTML = "";
         snap.forEach(child => {
             const r = child.val(); if(r.status==='pending') list.innerHTML += `<tr><td>${r.email}</td><td>Rs ${r.amount}</td><td><button class="btn btn-green" onclick="rtdb.ref('withdrawRequests/${child.key}').update({status:'Approved'})">Approve</button></td></tr>`;
-        });
-        list.innerHTML += "</table>";
-    });
-}
-
-// NEW FUNCTION: Load Viral Requests
-function loadViralRequests() {
-    rtdb.ref('viralRequests').on('value', snap => {
-        const list = document.getElementById("viralList"); list.innerHTML = "";
-        snap.forEach(child => {
-            const d = child.val();
-            let linksHTML = "";
-            for(let i=1; i<=5; i++) {
-                if(d["l"+i]) linksHTML += `<div><a href="${d["l"+i]}" target="_blank">Link ${i}</a> (Copy manually)</div>`;
-            }
-            list.innerHTML += `<tr style="border-bottom:2px solid #ddd">
-                <td style="vertical-align:top;">${d.email}</td>
-                <td>${linksHTML}</td>
-                <td style="vertical-align:top;"><button class="btn btn-red" onclick="rtdb.ref('viralRequests/${child.key}').remove()">Delete</button></td>
-            </tr>`;
         });
     });
 }
