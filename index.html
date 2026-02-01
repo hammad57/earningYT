@@ -21,21 +21,13 @@
         #overlay.active { display: block; }
         .btn-main { background: #ffc107; color: #333; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; transition: 0.3s; cursor: pointer; border:none; text-align: center; }
         .container { max-width: 1100px; margin: auto; padding: 20px; }
-        .section-title { text-align: center; margin: 50px 0 30px; font-size: 2rem; color: #60a5fa; }
         .card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
         .hidden { display: none !important; }
-        .pkg-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 30px 0; }
-        .pkg-card { position: relative; background: #1e293b; border: 2px solid #334155; border-radius: 20px; padding: 30px 20px; text-align: center; transition: 0.3s; }
-        .pkg-badge { position: absolute; top: 10px; right: -5px; background: #ff4757; color: white; padding: 5px 15px; border-radius: 5px; font-size: 11px; font-weight: bold; transform: rotate(5deg); }
-        .pkg-price { font-size: 2.2rem; font-weight: bold; color: white; margin: 15px 0; }
-        .pkg-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; font-size: 14px; }
-        .pkg-list li { margin-bottom: 12px; color: #cbd5e1; }
-        .pkg-list li i { color: #2ecc71; margin-right: 10px; }
         .top-bar { background: #1e293b; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; }
         .stat-box { background: #334155; padding: 15px; border-radius: 10px; flex: 1; text-align: center; }
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; box-sizing: border-box; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; box-sizing: border-box; }
         button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; background: var(--primary); color: white; }
-        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 20px; overflow-y: auto; }
+        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 20px; }
     </style>
 </head>
 <body>
@@ -51,48 +43,12 @@
         <div id="displayEmail" style="font-size:13px; margin-bottom:10px; color:#94a3b8">Guest</div>
         <div style="font-size:22px; font-weight:bold; color:#28a745">Rs <span id="totalBalance">0.00</span></div>
     </div>
-    <a class="sidebar-link" onclick="openPromoTab()"><i class="fas fa-rocket"></i> Buy Promotion</a>
-    
-    <a class="sidebar-link" onclick="openViralPopup()" style="color: #ff4444; border: 1px solid #ff4444; margin-top: 10px; border-radius: 5px;"><i class="fab fa-youtube"></i> Submit Viral Videos</a>
+
+    <a class="sidebar-link" onclick="openPromoTab()"><i class="fas fa-rocket"></i> Get Subscription</a>
+    <a class="sidebar-link" onclick="openViralPopup()" style="color: #ff4444;"><i class="fab fa-youtube"></i> Submit Viral Videos</a>
     
     <button onclick="applyWithdraw()" style="background:#28a745; margin-top:15px;">Withdraw Now</button>
     <button onclick="auth.signOut()" style="background:#ef4444; margin-top: 30px;">Sign Out</button>
-</div>
-
-<div id="landingPage">
-    <div class="hero" style="background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=1200'); background-size: cover; color: white; padding: 100px 20px; text-align: center;">
-        <h1 style="font-size:3.5rem; margin:0">Smart Earn</h1>
-        <p style="font-size:1.2rem; color:#cbd5e1; margin: 20px 0 40px;">Professional Watch & Earn Community</p>
-        <a href="#pkgSection" class="btn-main">View Packages</a>
-    </div>
-
-    <div id="pkgSection" class="container">
-        <h2 class="section-title">Channel Growth Packages</h2>
-        <div class="pkg-container">
-            <div class="pkg-card gold">
-                <div class="pkg-badge">POPULAR</div>
-                <h3 style="color:#ffd700">Gold Monthly</h3>
-                <div class="pkg-price">Rs 300<small style="font-size:12px; color:#aaa"> / 30 Days</small></div>
-                <button onclick="openPromo('Gold Monthly Package', 300)" style="background:#ffd700; color:#000">Choose Gold</button>
-            </div>
-            <div class="pkg-card premium">
-                <div class="pkg-badge" style="background:#00d2ff">BEST VALUE</div>
-                <h3 style="color:#00d2ff">Premium Monthly</h3>
-                <div class="pkg-price">Rs 500<small style="font-size:12px; color:#aaa"> / 30 Days</small></div>
-                <button onclick="openPromo('Premium Monthly Package', 500)" style="background:#00d2ff; color:#000">Choose Premium</button>
-            </div>
-        </div>
-
-        <div id="authBox" class="card" style="max-width: 450px; margin: 80px auto;">
-            <h2 style="text-align:center; color:#60a5fa">Login / Register</h2>
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <button id="tabLogin" onclick="switchAuth('login')" style="flex:1">Login</button>
-                <button id="tabRegister" onclick="switchAuth('register')" style="flex:1; background:#334155;">Register</button>
-            </div>
-            <div id="loginForm"><input id="lEmail" placeholder="Email"><input id="lPass" type="password" placeholder="Password"><button onclick="handleLogin()">Sign In</button></div>
-            <div id="registerForm" class="hidden"><input id="rName" placeholder="Full Name"><input id="rEmail" placeholder="Email"><input id="rPass" type="password" placeholder="Password"><button onclick="handleRegister()" style="background:var(--success)">Create Account</button></div>
-        </div>
-    </div>
 </div>
 
 <div id="dashboard" class="hidden">
@@ -103,47 +59,58 @@
     </div>
     <div class="container">
         <div class="card">
-            <h3>Earnings Statistics</h3>
             <div style="display:flex; gap: 10px;">
-                <div class="stat-box"><strong>Watch</strong><br>Rs <span id="watchPkr">0</span></div>
-                <div class="stat-box"><strong>Subs</strong><br>Rs <span id="subPkr">0</span></div>
-                <div class="stat-box"><strong>Bonus</strong><br>Rs <span id="bonusPkr">0</span></div>
+                <div class="stat-box"><strong>Balance</strong><br>Rs <span id="mainBal">0</span></div>
             </div>
         </div>
         <div id="taskList">Loading Tasks...</div>
     </div>
 </div>
 
-<div class="popup" id="viralPopup">
-    <div class="card" style="width:90%; max-width:500px; max-height:90vh; overflow-y:auto;">
-        <h3 style="color:#ff4444; text-align:center;">Submit Viral Videos</h3>
-        <p style="font-size:12px; text-align:center; color:#cbd5e1">Add up to 5 video links. Admin will review and add them to tasks.</p>
+<div id="landingPage">
+    <div class="container" id="pkgSection">
+        <h2 style="text-align:center; color:#60a5fa;">Our Packages</h2>
+        <div class="card" style="text-align:center;">
+            <h3>Gold Package</h3>
+            <p>Price: 300 PKR</p>
+            <button onclick="openPromo('Gold', 300)">Buy Now</button>
+        </div>
+        <div class="card" style="text-align:center;">
+            <h3>Premium Package</h3>
+            <p>Price: 500 PKR</p>
+            <button onclick="openPromo('Premium', 500)">Buy Now</button>
+        </div>
         
+        <div id="authBox" class="card" style="max-width: 400px; margin: 20px auto;">
+             <input id="lEmail" placeholder="Email"><input id="lPass" type="password" placeholder="Password"><button onclick="handleLogin()">Login</button>
+        </div>
+    </div>
+</div>
+
+<div class="popup" id="viralPopup">
+    <div class="card" style="width:90%; max-width:500px;">
+        <h3 style="color:#ff4444; text-align:center;">Submit 5 Viral Videos</h3>
         <input id="vl1" placeholder="Video Link 1">
         <input id="vl2" placeholder="Video Link 2">
         <input id="vl3" placeholder="Video Link 3">
         <input id="vl4" placeholder="Video Link 4">
         <input id="vl5" placeholder="Video Link 5">
-        
-        <button onclick="submitViralLinks()" style="background:#28a745; margin-top:10px;">Send to Admin</button>
-        <button onclick="document.getElementById('viralPopup').style.display='none'" style="background:none; margin-top:5px;">Cancel</button>
+        <button onclick="submitViralLinks()" style="background:#28a745;">Send to Admin</button>
+        <button onclick="document.getElementById('viralPopup').style.display='none'" style="background:none;">Cancel</button>
     </div>
 </div>
 
 <div class="popup" id="promoPopup">
-    <div class="card" style="width:95%; max-width: 500px;">
+    <div class="card" style="width:90%; max-width:450px;">
         <h3 id="promoTitle">Subscription</h3>
-        <p>Payable: <span id="promoPrice">0</span> PKR</p>
-        <div style="background:#0f172a; padding:15px; font-size:12px; border-radius:8px; margin-bottom:10px;">
-            Easypaisa: 0342-3944508 (Muluk Hussain)
-        </div>
-        <input id="promoEmail" placeholder="Email"><input id="promoLink" placeholder="Channel Link"><input id="promoTrx" placeholder="Transaction ID">
-        <button id="submitOrderBtn" onclick="submitPromo()" style="background:#28a745;">Submit Order</button>
-        <button onclick="document.getElementById('promoPopup').style.display='none'" style="background:none;">Cancel</button>
+        <p>Easypaisa: 0342-3944508</p>
+        <input id="promoLink" placeholder="Channel/Video Link">
+        <input id="promoTrx" placeholder="Transaction ID">
+        <button onclick="submitPromo()" style="background:#28a745;">Submit Order</button>
+        <button onclick="document.getElementById('promoPopup').style.display='none'" style="background:none;">Close</button>
     </div>
 </div>
 
-<div class="popup" id="withdrawPopup"><div class="card" style="max-width:400px;"><h3>Withdraw</h3><input id="wNumber" placeholder="Number"><input id="wAmount" type="number" placeholder="Amount"><button onclick="submitWithdrawRequest()">Submit</button><button onclick="document.getElementById('withdrawPopup').style.display='none'" style="background:none;">Close</button></div></div>
 <div class="popup" id="videoPopup"><div id="timerDisplay" style="color:#ffeb3b; font-size:24px;">18s</div><div id="player"></div></div>
 
 <script>
@@ -151,96 +118,62 @@ const firebaseConfig = { apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ", auth
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.firestore(), rtdb = firebase.database();
 
-let userDataGlobal = null, currentTotalBalance = 0;
-
-function toggleMenu() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("overlay").classList.toggle("active"); }
-function switchAuth(m) { document.getElementById("loginForm").classList.toggle("hidden", m==='register'); document.getElementById("registerForm").classList.toggle("hidden", m==='login'); }
-
-function handleLogin() { auth.signInWithEmailAndPassword(lEmail.value, lPass.value).catch(e => alert(e.message)); }
-function handleRegister() { auth.createUserWithEmailAndPassword(rEmail.value, rPass.value).then(c => { rtdb.ref('users/'+c.user.uid).set({email:rEmail.value, name:rName.value, watch:0, subPoints:0, bonus:0, withdrawnAmount:0}); }).catch(e => alert(e.message)); }
-
 auth.onAuthStateChanged(u => {
     if(u){
         document.getElementById("landingPage").classList.add("hidden");
         document.getElementById("dashboard").classList.remove("hidden");
         document.getElementById("displayEmail").innerText = u.email;
-        document.getElementById("promoEmail").value = u.email;
-        
         rtdb.ref('users/'+u.uid).on('value', s => { 
-            userDataGlobal = s.val(); 
-            if(userDataGlobal) renderDashboard(); 
+            let d = s.val(); 
+            if(d) {
+                let bal = ((d.watch||0)*0.38) + (d.bonus||0);
+                document.getElementById("totalBalance").innerText = bal.toFixed(2);
+                document.getElementById("userBalanceHead").innerText = "Rs " + bal.toFixed(2);
+                document.getElementById("mainBal").innerText = bal.toFixed(2);
+            }
         });
+        loadTasks();
     } else {
         document.getElementById("landingPage").classList.remove("hidden");
         document.getElementById("dashboard").classList.add("hidden");
     }
 });
 
-function renderDashboard() {
-    let w = (userDataGlobal.watch || 0) * 0.38, s = (userDataGlobal.subPoints || 0) * 0.60, b = (userDataGlobal.bonus || 0);
-    currentTotalBalance = (w + s + b) - (userDataGlobal.withdrawnAmount || 0);
-    document.getElementById("watchPkr").innerText = w.toFixed(2);
-    document.getElementById("subPkr").innerText = s.toFixed(2);
-    document.getElementById("bonusPkr").innerText = b.toFixed(2);
-    document.getElementById("totalBalance").innerText = currentTotalBalance.toFixed(2);
-    document.getElementById("userBalanceHead").innerText = "Rs " + currentTotalBalance.toFixed(2);
-    loadTasks();
+function handleLogin() { auth.signInWithEmailAndPassword(lEmail.value, lPass.value).catch(e => alert(e.message)); }
+function toggleMenu() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("overlay").classList.toggle("active"); }
+
+function openViralPopup() { toggleMenu(); document.getElementById("viralPopup").style.display = "flex"; }
+
+function submitViralLinks() {
+    const links = [vl1.value, vl2.value, vl3.value, vl4.value, vl5.value].filter(l => l !== "");
+    if(links.length === 0) return alert("Kam az kam ek link dalain");
+    
+    rtdb.ref('viralRequests').push({
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email,
+        links: links,
+        timestamp: Date.now()
+    }).then(() => {
+        alert("Sent to admin!");
+        document.getElementById("viralPopup").style.display = "none";
+    });
+}
+
+function openPromoTab() { toggleMenu(); document.getElementById("dashboard").classList.add("hidden"); document.getElementById("landingPage").classList.remove("hidden"); }
+function openPromo(p, pr) { if(!auth.currentUser) return alert("Login first"); promoTitle.innerText=p; promoPopup.style.display='flex'; }
+function submitPromo() {
+    rtdb.ref('promotionRequests').push({uid:auth.currentUser.uid, email:auth.currentUser.email, link:promoLink.value, trxId:promoTrx.value, package:promoTitle.innerText}).then(()=>alert("Request Sent!"));
+    promoPopup.style.display='none';
 }
 
 async function loadTasks() {
     const list = document.getElementById("taskList"); list.innerHTML = "";
     const vS = await db.collection("videos").get();
-    vS.forEach(doc => { const v = doc.data(); if(v.enabled) list.innerHTML += `<div class="card" style="display:flex; justify-content:space-between; align-items:center;">Video Task ${v.slot} <button onclick="playVideo('${v.link}', 'slot${v.slot}')" style="width:auto">Watch</button></div>`; });
-}
-
-function openPromoTab() { toggleMenu(); document.getElementById("dashboard").classList.add("hidden"); document.getElementById("landingPage").classList.remove("hidden"); window.scrollTo(0, document.getElementById("pkgSection").offsetTop); }
-
-// NEW FUNCTION: Open Popup
-function openViralPopup() {
-    toggleMenu(); // Close sidebar
-    document.getElementById("viralPopup").style.display = "flex";
-}
-
-// NEW FUNCTION: Submit 5 Links
-function submitViralLinks() {
-    if(!auth.currentUser) return alert("Login first");
-    
-    const links = {
-        l1: document.getElementById("vl1").value,
-        l2: document.getElementById("vl2").value,
-        l3: document.getElementById("vl3").value,
-        l4: document.getElementById("vl4").value,
-        l5: document.getElementById("vl5").value,
-        email: auth.currentUser.email,
-        uid: auth.currentUser.uid,
-        timestamp: Date.now()
-    };
-    
-    // Check if at least one link is there
-    if(!links.l1 && !links.l2) return alert("Please enter at least one link");
-
-    rtdb.ref('viralRequests').push(links).then(() => {
-        alert("Links sent to Admin successfully!");
-        document.getElementById("viralPopup").style.display = "none";
-        // Clear inputs
-        for(let i=1; i<=5; i++) document.getElementById("vl"+i).value = "";
-    });
-}
-
-function openPromo(p, pr) { if(!auth.currentUser) return alert("Login first!"); promoTitle.innerText=p; promoPrice.innerText=pr; promoPopup.style.display='flex'; }
-function submitPromo() { rtdb.ref('promotionRequests').push({uid:auth.currentUser.uid, email:promoEmail.value, link:promoLink.value, trxId:promoTrx.value, package:promoTitle.innerText, status:'pending'}).then(()=>alert("Done!")); promoPopup.style.display='none'; }
-
-function applyWithdraw() { if(currentTotalBalance < 100) return alert("Min Rs 100"); withdrawPopup.style.display='flex'; }
-function submitWithdrawRequest() {
-    const a = parseFloat(wAmount.value);
-    rtdb.ref('withdrawRequests/'+Date.now()).set({uid:auth.currentUser.uid, email:auth.currentUser.email, amount:a, status:'pending'}).then(() => {
-        rtdb.ref('users/'+auth.currentUser.uid).update({withdrawnAmount:(userDataGlobal.withdrawnAmount||0)+a});
-        withdrawPopup.style.display='none'; alert("Submitted!");
-    });
+    vS.forEach(doc => { const v = doc.data(); list.innerHTML += `<div class="card">Task ${v.slot} <button onclick="playVideo('${v.link}')" style="width:auto; float:right;">Watch</button></div>`; });
 }
 
 let player, vTime, watchTimer;
-function playVideo(u, s) { document.getElementById("videoPopup").style.display = "flex"; vTime = 18; const id = u.split('v=')[1]?.split('&')[0]; if(player) player.loadVideoById(id); else player = new YT.Player('player', { height: '250', width: '100%', videoId: id, events: { 'onStateChange': e => { if(e.data == 1) startT(); else clearInterval(watchTimer); } } }); }
+function playVideo(u) { document.getElementById("videoPopup").style.display = "flex"; vTime = 18; const id = u.split('v=')[1]?.split('&')[0]; if(player) player.loadVideoById(id); else player = new YT.Player('player', { height: '250', width: '100%', videoId: id, events: { 'onStateChange': e => { if(e.data == 1) startT(); } } }); }
 function startT() { clearInterval(watchTimer); watchTimer = setInterval(() => { vTime--; timerDisplay.innerText = vTime+"s"; if(vTime<=0){ clearInterval(watchTimer); rtdb.ref('users/'+auth.currentUser.uid).once('value', s => { rtdb.ref('users/'+auth.currentUser.uid).update({watch: (s.val().watch||0)+1}); videoPopup.style.display='none'; player.stopVideo(); }); } }, 1000); }
 </script>
 </body>
