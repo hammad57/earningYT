@@ -51,9 +51,11 @@
         <div id="displayEmail" style="font-size:13px; margin-bottom:10px; color:#94a3b8">Guest</div>
         <div style="font-size:22px; font-weight:bold; color:#28a745">Rs <span id="totalBalance">0.00</span></div>
     </div>
-    <a class="sidebar-link" onclick="openPromoTab()"><i class="fas fa-rocket"></i> Buy Promotion</a>
+    <a class="sidebar-link" onclick="openPromoTab()"><i class="fas fa-shopping-cart"></i> Buy Promotion</a>
     
-    <a class="sidebar-link" id="myPromoLink" onclick="showPromoHub()" style="display:none; color: #ffd700; background: rgba(255, 215, 0, 0.1); border: 1px solid #ffd700; border-radius: 5px; margin-top: 10px;"><i class="fas fa-star"></i> My Promotion Hub</a>
+    <a class="sidebar-link" id="myPromoLink" onclick="showPromoHub()" style="display:none; color: #ff0000; background: rgba(255, 0, 0, 0.1); border: 1px solid #ff0000; border-radius: 5px; margin-top: 10px;">
+        <i class="fab fa-youtube"></i> Promote YT Channel
+    </a>
     
     <button onclick="applyWithdraw()" style="background:#28a745; margin-top:15px;">Withdraw Now</button>
     <button onclick="auth.signOut()" style="background:#ef4444; margin-top: 30px;">Sign Out</button>
@@ -125,15 +127,27 @@
 
 <div id="promoHub" class="hidden container" style="padding-top: 50px;">
     <div class="card">
-        <h3 style="color:#ffd700">My Promotion Hub</h3>
-        <div id="subInfo" style="background:#0f172a; padding:15px; border-radius:10px; margin-bottom:20px; border-left: 5px solid #ffd700;">Loading...</div>
+        <h3 style="color:#ff0000"><i class="fab fa-youtube"></i> Promote YT Channel</h3>
+        <p style="color:#cbd5e1; font-size: 13px;">Submit your links below. Admin will review and add them to the viral tasks.</p>
+        
+        <div id="subInfo" style="background:#0f172a; padding:15px; border-radius:10px; margin-bottom:20px; border-left: 5px solid #28a745;">Loading...</div>
+        
         <div id="submissionForm">
-            <h4 style="color:#60a5fa">Submit Links</h4>
-            <p id="limitText" style="font-size:12px; color:#94a3b8"></p>
-            <div style="margin-bottom:20px;"><input type="text" id="vLinkInput" placeholder="Video URL"><button onclick="submitUserContent('video')" style="background:#28a745;">Submit Video</button></div>
-            <div id="channelInputSection" class="hidden"><input type="text" id="cLinkInput" placeholder="Channel URL"><button onclick="submitUserContent('channel')" style="background:#00d2ff; color:#000;">Submit Channel</button></div>
+            <h4 style="color:#60a5fa">Submit Content for Viral Reach</h4>
+            <div style="margin-bottom:20px;">
+                <label>Video Link:</label>
+                <input type="text" id="vLinkInput" placeholder="https://youtu.be/...">
+                <button onclick="submitUserContent('video')" style="background:#ff0000; margin-top:5px;">Submit Video</button>
+            </div>
+            
+            <div id="channelInputSection" class="hidden">
+                <label>Channel Link:</label>
+                <input type="text" id="cLinkInput" placeholder="https://youtube.com/@...">
+                <button onclick="submitUserContent('channel')" style="background:#00d2ff; color:#000; margin-top:5px;">Submit Channel</button>
+            </div>
         </div>
-        <h4 style="margin-top:30px;">Your Submissions:</h4>
+        <hr style="border-color:#334155; margin: 20px 0;">
+        <h4 style="margin-top:10px;">Your Submitted Links (Admin View):</h4>
         <div id="userLinksList" style="font-size:12px; background: #0f172a; padding: 10px; border-radius: 8px;"></div>
     </div>
     <button onclick="closePromoHub()" style="background:#334155;">Back to Dashboard</button>
@@ -181,7 +195,7 @@ auth.onAuthStateChanged(u => {
             if(userDataGlobal) renderDashboard(); 
         });
         
-        // Listener 2: Subscription (V.Important for Sidebar link)
+        // Listener 2: Subscription (Check for Viral Access)
         checkSubscription(u.uid);
     } else {
         document.getElementById("landingPage").classList.remove("hidden");
@@ -216,8 +230,9 @@ function checkSubscription(uid) {
         if(sub) {
             const expiry = new Date(sub.expiryDate);
             if(expiry > new Date()) {
-                promoBtn.style.display = "block"; // Show sidebar link
-                document.getElementById("subInfo").innerHTML = `Package: <b>${sub.package}</b><br>Expiry: ${expiry.toLocaleDateString()}`;
+                // Subscription is Active
+                promoBtn.style.display = "block"; 
+                document.getElementById("subInfo").innerHTML = `Active Plan: <b>${sub.package}</b><br>Valid Until: ${expiry.toLocaleDateString()}`;
                 const isPrem = sub.package.includes("Premium");
                 document.getElementById("channelInputSection").classList.toggle("hidden", !isPrem);
                 loadUserSubmittedLinks(uid);
@@ -229,16 +244,21 @@ function checkSubscription(uid) {
 function submitUserContent(type) {
     const input = type === 'video' ? document.getElementById("vLinkInput") : document.getElementById("cLinkInput");
     if(!input.value) return;
-    rtdb.ref(`userSubmittedLinks/${auth.currentUser.uid}/${type}s`).push({ url: input.value, status: 'pending' }).then(() => { input.value = ""; alert("Submitted!"); });
+    // Pushing to Firebase so Admin can see
+    rtdb.ref(`userSubmittedLinks/${auth.currentUser.uid}/${type}s`).push({ url: input.value, status: 'Sent to Admin' }).then(() => { input.value = ""; alert("Submitted successfully! Admin will review it."); });
 }
 
 function loadUserSubmittedLinks(uid) {
     rtdb.ref('userSubmittedLinks/' + uid).on('value', snap => {
         const list = document.getElementById("userLinksList"); list.innerHTML = "";
-        snap.forEach(child => {
-            Object.values(child.val()).forEach(item => {
-                list.innerHTML += `<div style="padding:5px; border-bottom:1px solid #334155;">${item.url} - <span style="color:#ffd700">${item.status}</span></div>`;
-            });
+        const data = snap.val();
+        if(!data) { list.innerHTML = "No links submitted yet."; return; }
+        
+        if(data.videos) Object.values(data.videos).forEach(item => {
+            list.innerHTML += `<div style="padding:5px; border-bottom:1px solid #334155; display:flex; justify-content:space-between;"><span>Video</span> <span>${item.status}</span></div>`;
+        });
+        if(data.channels) Object.values(data.channels).forEach(item => {
+            list.innerHTML += `<div style="padding:5px; border-bottom:1px solid #334155; display:flex; justify-content:space-between;"><span>Channel</span> <span>${item.status}</span></div>`;
         });
     });
 }
