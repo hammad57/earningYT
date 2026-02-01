@@ -3,83 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Smart Earn</title>
+    <title>Smart Earn - Admin Control Center</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; margin: 0; display: flex; background: #f4f7fe; }
-        #sidebar { width: 250px; background: #0f172a; color: white; height: 100vh; padding: 20px; box-sizing: border-box; }
-        #main { flex: 1; padding: 20px; overflow-y: auto; height: 100vh; }
-        .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .btn { padding: 8px 15px; border: none; cursor: pointer; border-radius: 4px; color: white; margin-right: 5px; }
-        .btn-green { background: #10b981; } .btn-red { background: #ef4444; } .btn-blue { background: #3b82f6; }
-        table { width: 100%; border-collapse: collapse; }
+        :root { --primary: #1976d2; --dark: #0f172a; --sidebar-w: 240px; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f7fe; display: flex; }
+        #sidebar { width: var(--sidebar-w); background: var(--dark); color: white; height: 100vh; position: fixed; overflow-y: auto; }
+        .nav-link { padding: 15px 20px; display: block; color: #cbd5e1; text-decoration: none; border-bottom: 1px solid #1e293b; cursor: pointer; }
+        #main { flex: 1; margin-left: var(--sidebar-w); padding: 20px; width: calc(100% - var(--sidebar-w)); }
+        .card { background: white; padding: 20px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .grid-task { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .task-box { border: 1px solid #ddd; padding: 10px; border-radius: 8px; }
+        .btn { padding: 8px 12px; border-radius: 6px; cursor: pointer; border: none; font-size: 11px; font-weight: bold; }
+        .btn-green { background: #10b981; color: white; }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-blue { background: #3b82f6; color: white; }
+        .hidden { display: none !important; }
+        input { width: 100%; padding: 8px; margin: 5px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        table { width:100%; border-collapse:collapse; }
         th, td { text-align: left; padding: 10px; border-bottom: 1px solid #eee; }
-        .hidden { display: none; }
-        input { padding: 5px; border: 1px solid #ccc; width: 60%; }
-        
-        /* Modal for Viewing Links */
-        #linkModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; }
-        #modalContent { background: white; width: 50%; padding: 20px; border-radius: 8px; max-height: 80vh; overflow-y: auto; }
     </style>
 </head>
 <body>
 
-<div id="loginBox" style="margin: 100px auto; text-align: center; width: 300px;">
+<div id="authBox" style="max-width:350px; margin:100px auto; text-align:center; background:white; padding:30px; border-radius:15px;">
     <h2>Admin Login</h2>
-    <input id="aEmail" placeholder="Email" style="width:100%; margin-bottom:10px;"><br>
-    <input id="aPass" type="password" placeholder="Password" style="width:100%; margin-bottom:10px;"><br>
-    <button class="btn btn-blue" onclick="adminLogin()">Login</button>
+    <input type="email" id="aEmail" placeholder="Email"><br>
+    <input type="password" id="aPass" placeholder="Password"><br>
+    <button class="btn btn-green" style="width:100%" onclick="auth.signInWithEmailAndPassword(aEmail.value, aPass.value)">Login</button>
 </div>
 
-<div id="adminPanel" class="hidden" style="width: 100%; display: flex;">
+<div id="adminContent" class="hidden">
     <div id="sidebar">
-        <h3>Smart Admin</h3>
-        <p onclick="showSec('secTasks')" style="cursor:pointer">Manage Tasks</p>
-        <p onclick="showSec('secPromo')" style="cursor:pointer">Approvals</p>
-        <p onclick="showSec('secUsers')" style="cursor:pointer">User Links</p>
-        <p onclick="showSec('secWithdraw')" style="cursor:pointer">Withdrawals</p>
-        <button class="btn btn-red" onclick="location.reload()">Logout</button>
+        <div style="padding:20px; text-align:center; font-weight:bold;">SMART ADMIN</div>
+        <a class="nav-link" onclick="showSection('tasks')">Video Tasks</a>
+        <a class="nav-link" onclick="showSection('promos')">Promotion Requests</a>
+        <a class="nav-link" onclick="showSection('viral')">User Viral Links (NEW)</a>
+        <a class="nav-link" onclick="showSection('users')">User Management</a>
+        <a class="nav-link" onclick="showSection('withdraw')">Withdrawals</a>
+        <div style="padding:20px;"><button onclick="auth.signOut()" class="btn btn-red" style="width:100%">Logout</button></div>
     </div>
-    
+
     <div id="main">
-        <div id="secTasks" class="section">
-            <div class="card">
-                <h3>Set Video Tasks (Slots 1-10)</h3>
-                <div id="videoSlotsContainer"></div>
-            </div>
-        </div>
+        <section id="tasks" class="card">
+            <h3>Manage Platform Tasks</h3>
+            <div class="grid-task" id="videoSlots"></div>
+        </section>
 
-        <div id="secPromo" class="section hidden">
-            <div class="card">
-                <h3>Package Approvals</h3>
-                <table><thead><tr><th>Email</th><th>Package</th><th>TRX</th><th>Action</th></tr></thead><tbody id="promoTable"></tbody></table>
-            </div>
-        </div>
+        <section id="promos" class="card hidden">
+            <h3>Pending Promotion Orders</h3>
+            <tbody id="promoList"></tbody>
+        </section>
 
-        <div id="secUsers" class="section hidden">
-            <div class="card">
-                <h3>Users & Viral Links</h3>
-                <table><thead><tr><th>Email</th><th>Action</th></tr></thead><tbody id="usersTable"></tbody></table>
-            </div>
-        </div>
+        <section id="viral" class="card hidden">
+            <h3>User Submitted Viral Links</h3>
+            <p>Copy these links and add them to the Task Slots above.</p>
+            <table style="width:100%;">
+                <thead><tr><th>User Email</th><th>Links (Click to Copy)</th><th>Action</th></tr></thead>
+                <tbody id="viralList"></tbody>
+            </table>
+        </section>
 
-        <div id="secWithdraw" class="section hidden">
-            <div class="card">
-                <h3>Withdraw Requests</h3>
-                <table><thead><tr><th>Email</th><th>Amount</th><th>Number</th><th>Action</th></tr></thead><tbody id="withdrawTable"></tbody></table>
-            </div>
-        </div>
-    </div>
-</div>
+        <section id="users" class="card hidden">
+            <h3>User List</h3>
+            <tbody id="usersList"></tbody>
+        </section>
 
-<div id="linkModal">
-    <div id="modalContent">
-        <h3>User Submitted Links</h3>
-        <div id="linksList"></div>
-        <button class="btn btn-red" onclick="document.getElementById('linkModal').style.display='none'" style="margin-top:20px;">Close</button>
+        <section id="withdraw" class="card hidden">
+            <h3>Pending Withdrawals</h3>
+            <tbody id="withdrawList"></tbody>
+        </section>
     </div>
 </div>
 
@@ -88,97 +85,84 @@ const firebaseConfig = { apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ", auth
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.firestore(), rtdb = firebase.database();
 
-function adminLogin() {
-    auth.signInWithEmailAndPassword(document.getElementById("aEmail").value, document.getElementById("aPass").value)
-    .then(() => {
-        document.getElementById("loginBox").classList.add("hidden");
-        document.getElementById("adminPanel").classList.remove("hidden");
-        loadAllData();
-    }).catch(e => alert(e.message));
-}
-
-function showSec(id) {
-    document.querySelectorAll('.section').forEach(d => d.classList.add('hidden'));
-    document.getElementById(id).classList.remove('hidden');
-}
-
-function loadAllData() {
-    // 1. Load Slots
-    const vDiv = document.getElementById("videoSlotsContainer");
-    for(let i=1; i<=10; i++) {
-        vDiv.innerHTML += `<div style="margin-bottom:10px;">Slot ${i}: <input id="v${i}" placeholder="Link"><button class="btn btn-blue" onclick="saveTask(${i})">Save</button></div>`;
+auth.onAuthStateChanged(u => {
+    if(u) {
+        document.getElementById("authBox").classList.add("hidden");
+        document.getElementById("adminContent").classList.remove("hidden");
+        initTaskSlots(); loadPromos(); loadUsers(); loadWithdrawRequests(); loadViralRequests();
+    } else {
+        document.getElementById("authBox").classList.remove("hidden");
+        document.getElementById("adminContent").classList.add("hidden");
     }
+});
 
-    // 2. Load Promos
+function showSection(id) {
+    document.querySelectorAll("section").forEach(s => s.classList.add("hidden"));
+    document.getElementById(id).classList.remove("hidden");
+}
+
+function initTaskSlots() {
+    const vContainer = document.getElementById("videoSlots"); vContainer.innerHTML = "";
+    for(let i=1; i<=10; i++) {
+        vContainer.innerHTML += `<div class="task-box">
+            Slot ${i} <input id="v${i}" placeholder="YouTube Link">
+            <button class="btn btn-blue" onclick="saveV(${i})">Save</button>
+        </div>`;
+        db.collection("videos").doc("slot"+i).get().then(s => { if(s.exists) document.getElementById("v"+i).value = s.data().link; });
+    }
+}
+function saveV(n){ db.collection("videos").doc("slot"+n).set({slot:n, link:document.getElementById("v"+n).value, enabled:true}).then(()=>alert("Saved")); }
+
+function loadPromos() {
     rtdb.ref('promotionRequests').on('value', snap => {
-        const t = document.getElementById("promoTable"); t.innerHTML = "";
-        snap.forEach(c => {
-            const v = c.val();
-            t.innerHTML += `<tr><td>${v.email}</td><td>${v.package}</td><td>${v.trxId}</td><td><button class="btn btn-green" onclick="approve('${c.key}','${v.uid}','${v.package}')">Approve</button></td></tr>`;
+        const list = document.getElementById("promoList"); list.innerHTML = "<table><tr><th>Email</th><th>Package</th><th>Action</th></tr>";
+        snap.forEach(child => {
+            const r = child.val();
+            list.innerHTML += `<tr><td>${r.email}</td><td>${r.package}</td>
+            <td><button class="btn btn-green" onclick="rtdb.ref('promotionRequests/${child.key}').remove()">Done</button></td></tr>`;
         });
+        list.innerHTML += "</table>";
     });
+}
 
-    // 3. Load Users for Links
+function loadUsers() {
     rtdb.ref('users').on('value', snap => {
-        const t = document.getElementById("usersTable"); t.innerHTML = "";
-        snap.forEach(c => {
-            t.innerHTML += `<tr><td>${c.val().email}</td><td><button class="btn btn-blue" onclick="viewLinks('${c.key}')">View Viral Links</button></td></tr>`;
+        const list = document.getElementById("usersList"); list.innerHTML = "<table>";
+        snap.forEach(child => {
+            const u = child.val();
+            list.innerHTML += `<tr><td>${u.email}</td><td>Rs ${u.bonus||0}</td></tr>`;
         });
+        list.innerHTML += "</table>";
     });
+}
 
-    // 4. Withdrawals
+function loadWithdrawRequests() {
     rtdb.ref('withdrawRequests').on('value', snap => {
-        const t = document.getElementById("withdrawTable"); t.innerHTML = "";
-        snap.forEach(c => {
-            const v = c.val();
-            if(v.status==='pending') t.innerHTML += `<tr><td>${v.email}</td><td>${v.amount}</td><td>${v.number}</td><td><button class="btn btn-green" onclick="payOut('${c.key}')">Done</button></td></tr>`;
+        const list = document.getElementById("withdrawList"); list.innerHTML = "<table>";
+        snap.forEach(child => {
+            const r = child.val(); if(r.status==='pending') list.innerHTML += `<tr><td>${r.email}</td><td>Rs ${r.amount}</td><td><button class="btn btn-green" onclick="rtdb.ref('withdrawRequests/${child.key}').update({status:'Approved'})">Approve</button></td></tr>`;
         });
+        list.innerHTML += "</table>";
     });
 }
 
-function saveTask(i) {
-    db.collection("videos").doc("slot"+i).set({ slot:i, link:document.getElementById("v"+i).value, enabled:true }).then(()=>alert("Saved"));
-}
-
-function approve(key, uid, pkg) {
-    const d = new Date(); d.setDate(d.getDate() + 30);
-    rtdb.ref('activeSubscriptions/'+uid).set({ package:pkg, expiryDate:d.toISOString(), status:'active' });
-    rtdb.ref('promotionRequests/'+key).remove();
-    alert("Approved! User can now see Promote Option.");
-}
-
-function viewLinks(uid) {
-    document.getElementById("linkModal").style.display = "flex";
-    const list = document.getElementById("linksList");
-    list.innerHTML = "Fetching...";
-    
-    rtdb.ref('userSubmittedLinks/'+uid).on('value', snap => {
-        list.innerHTML = "";
-        const data = snap.val();
-        if(!data) { list.innerHTML = "No links found."; return; }
-        
-        ['video', 'channel'].forEach(type => {
-            if(data[type+'s']) {
-                Object.keys(data[type+'s']).forEach(k => {
-                    const item = data[type+'s'][k];
-                    list.innerHTML += `<div style="background:#f9f9f9; border:1px solid #ddd; padding:10px; margin-bottom:5px;">
-                        <strong>${type.toUpperCase()}:</strong> <a href="${item.url}" target="_blank">${item.url}</a><br>
-                        Status: ${item.status}<br>
-                        <button class="btn btn-green" onclick="updateStatus('${uid}','${type}s','${k}','Task Added')">Mark as Added</button>
-                    </div>`;
-                });
+// NEW FUNCTION: Load Viral Requests
+function loadViralRequests() {
+    rtdb.ref('viralRequests').on('value', snap => {
+        const list = document.getElementById("viralList"); list.innerHTML = "";
+        snap.forEach(child => {
+            const d = child.val();
+            let linksHTML = "";
+            for(let i=1; i<=5; i++) {
+                if(d["l"+i]) linksHTML += `<div><a href="${d["l"+i]}" target="_blank">Link ${i}</a> (Copy manually)</div>`;
             }
+            list.innerHTML += `<tr style="border-bottom:2px solid #ddd">
+                <td style="vertical-align:top;">${d.email}</td>
+                <td>${linksHTML}</td>
+                <td style="vertical-align:top;"><button class="btn btn-red" onclick="rtdb.ref('viralRequests/${child.key}').remove()">Delete</button></td>
+            </tr>`;
         });
     });
-}
-
-function updateStatus(uid, type, key, status) {
-    rtdb.ref(`userSubmittedLinks/${uid}/${type}/${key}`).update({ status: status });
-    alert("Status Updated");
-}
-
-function payOut(key) {
-    rtdb.ref('withdrawRequests/'+key).update({ status: 'paid' });
 }
 </script>
 </body>
