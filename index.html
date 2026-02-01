@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Earn - Professional Platform</title>
+    <title>Smart Earn - Professional Earning Platform</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
@@ -14,100 +14,102 @@
     <style>
         :root { --primary: #1976d2; --dark: #0f172a; --success: #28a745; --bg-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg-gradient); color: #e2e8f0; min-height: 100vh; overflow-x: hidden; }
+        
+        /* Sidebar Restored */
         #sidebar { width: 280px; background: #1e293b; color: white; height: 100vh; padding: 20px; position: fixed; left: -280px; top: 0; box-sizing: border-box; overflow-y: auto; z-index: 2000; transition: 0.3s ease-in-out; border-right: 1px solid #334155; }
         #sidebar.open { left: 0; }
         .sidebar-link { display: block; padding: 12px; color: #60a5fa; text-decoration: none; border-bottom: 1px solid #334155; font-weight: bold; cursor: pointer; }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1999; }
         #overlay.active { display: block; }
-        .btn-main { background: #ffc107; color: #333; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; transition: 0.3s; cursor: pointer; border:none; text-align: center; }
-        .container { max-width: 1100px; margin: auto; padding: 20px; }
-        .section-title { text-align: center; margin: 50px 0 30px; font-size: 2rem; color: #60a5fa; }
+
+        /* UI Elements */
         .card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
+        .btn-main { background: #ffc107; color: #333; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; cursor: pointer; border:none; }
         .hidden { display: none !important; }
-        .top-bar { background: #1e293b; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; }
-        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; box-sizing: border-box; }
-        button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; background: var(--primary); color: white; }
-        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 20px; }
-        /* Special Golden Link Style */
-        #myPromoLink { background: linear-gradient(45deg, #ffd700, #b8860b); color: #000 !important; border: none; display: none; margin-top: 15px; box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3); }
+        
+        /* Fixed Promo Link Style */
+        #myPromoLink { 
+            display: none; 
+            background: linear-gradient(45deg, #ffd700, #ffa500); 
+            color: #000 !important; 
+            border-radius: 8px; 
+            margin-top: 15px; 
+            text-align: center;
+        }
+
+        .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; }
     </style>
 </head>
 <body>
 
 <div id="overlay" onclick="toggleMenu()"></div>
+
 <div id="sidebar">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="color: #60a5fa; margin: 0;">Profile</h3>
-        <button onclick="toggleMenu()" style="width: auto; background: none; color: white; font-size: 20px;">×</button>
-    </div>
-    <hr style="border: 0.5px solid #334155; margin: 15px 0;">
-    <div id="displayEmail" style="font-size:12px; color:#94a3b8">Guest</div>
-    <div style="font-size:22px; font-weight:bold; color:#28a745; margin-bottom: 15px;">Rs <span id="totalBalance">0.00</span></div>
+    <h3 style="color: #60a5fa;">Smart Earn</h3>
+    <div id="displayEmail" style="font-size:12px; color:#94a3b8; margin-bottom:10px;">Guest</div>
+    <div style="font-size:20px; font-weight:bold; color:#28a745;">Rs <span id="totalBalance">0.00</span></div>
+    <hr style="border:0.5px solid #334155;">
     
-    <a class="sidebar-link" onclick="openPromoTab()"><i class="fas fa-rocket"></i> Buy Promotion</a>
+    <a class="sidebar-link" onclick="location.reload()">Dashboard</a>
+    <a class="sidebar-link" onclick="openPromoTab()">Buy Promotion</a>
     
-    <a class="sidebar-link" id="myPromoLink" onclick="showPromoHub()"><i class="fas fa-star"></i> MY PROMOTION HUB</a>
+    <a class="sidebar-link" id="myPromoLink" onclick="showPromoHub()"><i class="fas fa-video"></i> MY PROMOTION HUB</a>
     
-    <button onclick="applyWithdraw()" style="background:#28a745; margin-top:20px;">Withdraw</button>
-    <button onclick="auth.signOut()" style="background:#ef4444; margin-top: 20px;">Sign Out</button>
+    <a class="sidebar-link" onclick="applyWithdraw()">Withdraw</a>
+    <button onclick="auth.signOut()" style="width:100%; margin-top:20px; background:#ef4444; color:white; border:none; padding:10px; border-radius:5px;">Logout</button>
 </div>
 
 <div id="landingPage">
-    <div class="hero" style="text-align: center; padding: 80px 20px;">
-        <h1>Smart Earn</h1>
-        <p>Boost Your YouTube Journey</p>
-        <a href="#pkgSection" class="btn-main">Get Started</a>
+    <div style="text-align:center; padding:100px 20px;">
+        <h1>Professional Earning</h1>
+        <a href="#pkgSection" class="btn-main">View Packages</a>
     </div>
-    <div id="pkgSection" class="container">
+    <div id="pkgSection" style="padding:20px;">
         <div class="card" style="text-align:center;">
-            <h3>Gold Package - Rs 300</h3>
+            <h3>Gold - Rs 300</h3>
             <button onclick="openPromo('Gold Monthly Package', 300)">Buy Now</button>
         </div>
-        <div class="card" style="text-align:center;">
-            <h3>Premium Package - Rs 500</h3>
-            <button onclick="openPromo('Premium Monthly Package', 500)">Buy Now</button>
-        </div>
-        <div id="authBox" class="card" style="max-width: 400px; margin: 50px auto;">
-            <input id="lEmail" placeholder="Email"><input id="lPass" type="password" placeholder="Password">
-            <button onclick="handleLogin()">Login</button>
-            <button onclick="handleRegister()" style="background:#334155; margin-top:10px;">Register</button>
+        <div id="authBox" class="card" style="max-width:400px; margin:auto;">
+            <input id="lEmail" type="email" placeholder="Email" style="width:100%; padding:10px; margin:5px 0;">
+            <input id="lPass" type="password" placeholder="Password" style="width:100%; padding:10px; margin:5px 0;">
+            <button onclick="handleLogin()" style="width:100%; padding:10px; background:var(--primary); color:white; border:none;">Login</button>
         </div>
     </div>
 </div>
 
 <div id="dashboard" class="hidden">
-    <div class="top-bar">
-        <button onclick="toggleMenu()" style="background:none; width:auto; font-size:22px;">☰</button>
-        <div id="userBalanceHead" style="color:#28a745; font-weight:bold;">Rs 0.00</div>
+    <div style="padding:15px; background:#1e293b; display:flex; justify-content:space-between;">
+        <button onclick="toggleMenu()" style="background:none; border:none; color:white; font-size:20px;">☰</button>
+        <div id="userBalanceHead">Rs 0.00</div>
     </div>
-    <div class="container">
-        <div class="card" id="taskList">Loading...</div>
-    </div>
+    <div id="taskList" style="padding:20px;"></div>
 </div>
 
-<div id="promoHub" class="hidden container">
+<div id="promoHub" class="hidden" style="padding:20px;">
     <div class="card">
-        <h2 style="color:#ffd700;">Active Promotion Hub</h2>
-        <div id="subInfo" style="padding:10px; background:#0f172a; margin-bottom:10px; border-radius:5px;"></div>
-        <input type="text" id="vLinkInput" placeholder="Video Link">
-        <button onclick="submitUserContent('video')">Submit Video</button>
-        <div id="channelInputSection" class="hidden">
-            <input type="text" id="cLinkInput" placeholder="Channel Link" style="margin-top:10px;">
-            <button onclick="submitUserContent('channel')" style="background:#00d2ff; color:#000;">Submit Channel</button>
+        <h2 style="color:#ffd700;">My Promotion Hub</h2>
+        <div id="subInfo" style="margin-bottom:15px; font-size:14px;"></div>
+        <input type="text" id="vLinkInput" placeholder="Paste Video Link" style="width:100%; padding:10px; margin-bottom:10px;">
+        <button onclick="submitUserContent('video')" style="width:100%; padding:10px; background:#28a745; color:white; border:none;">Submit Video</button>
+        
+        <div id="channelInputSection" class="hidden" style="margin-top:10px;">
+            <input type="text" id="cLinkInput" placeholder="Paste Channel Link" style="width:100%; padding:10px; margin-bottom:10px;">
+            <button onclick="submitUserContent('channel')" style="width:100%; padding:10px; background:#00d2ff; color:black; border:none;">Submit Channel</button>
         </div>
-        <h4 style="margin-top:20px;">History:</h4>
-        <div id="userLinksList" style="font-size:12px;"></div>
+        
+        <h4 style="margin-top:20px;">My Submissions:</h4>
+        <div id="userLinksList" style="font-size:12px; opacity:0.8;"></div>
     </div>
-    <button onclick="closePromoHub()">Close</button>
+    <button onclick="closePromoHub()" style="width:100%; padding:10px;">Back</button>
 </div>
 
 <div class="popup" id="promoPopup">
     <div class="card" style="width:90%; max-width:400px;">
         <h3 id="promoTitle"></h3>
-        <p>Pay to: 0342-3944508</p>
-        <input id="promoTrx" placeholder="TRX ID"><input id="promoLink" placeholder="Channel Link">
-        <button onclick="submitPromo()">Submit Order</button>
-        <button onclick="document.getElementById('promoPopup').style.display='none'" style="background:none;">Cancel</button>
+        <p>Send Rs <span id="promoPrice"></span> to Easypaisa: 03423944508</p>
+        <input id="promoTrx" placeholder="Transaction ID" style="width:100%; padding:10px; margin:5px 0;">
+        <button onclick="submitPromo()" style="width:100%; padding:10px; background:var(--success); color:white; border:none;">Confirm Payment</button>
+        <button onclick="document.getElementById('promoPopup').style.display='none'" style="background:none; border:none; color:white; margin-top:10px;">Cancel</button>
     </div>
 </div>
 
@@ -118,10 +120,9 @@ const firebaseConfig = { apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ", auth
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(), db = firebase.firestore(), rtdb = firebase.database();
 
-function toggleMenu() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("overlay").classList.toggle("active"); }
+let userDataGlobal = null, currentSlot = "";
 
-function handleLogin() { auth.signInWithEmailAndPassword(lEmail.value, lPass.value).catch(e => alert(e.message)); }
-function handleRegister() { auth.createUserWithEmailAndPassword(rEmail.value, rPass.value).then(c => { rtdb.ref('users/'+c.user.uid).set({email:rEmail.value, watch:0, subPoints:0, bonus:0, withdrawnAmount:0}); }); }
+function toggleMenu() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("overlay").classList.toggle("active"); }
 
 auth.onAuthStateChanged(u => {
     if(u){
@@ -129,83 +130,104 @@ auth.onAuthStateChanged(u => {
         document.getElementById("dashboard").classList.remove("hidden");
         document.getElementById("displayEmail").innerText = u.email;
         
-        // Listener 1: User Data
-        rtdb.ref('users/'+u.uid).on('value', s => { 
-            const d = s.val(); 
-            if(d) document.getElementById("totalBalance").innerText = ((d.watch||0)*0.38 + (d.subPoints||0)*0.60 + (d.bonus||0) - (d.withdrawnAmount||0)).toFixed(2);
+        // Real-time user data
+        rtdb.ref('users/'+u.uid).on('value', s => {
+            userDataGlobal = s.val() || {};
+            const bal = ((userDataGlobal.watch||0)*0.38 + (userDataGlobal.subPoints||0)*0.60 + (userDataGlobal.bonus||0) - (userDataGlobal.withdrawnAmount||0)).toFixed(2);
+            document.getElementById("totalBalance").innerText = bal;
+            document.getElementById("userBalanceHead").innerText = "Rs " + bal;
+            loadTasks();
         });
 
-        // Listener 2: Subscription (CRITICAL FIX)
-        // Hum pure 'activeSubscriptions' node ko listen kar rahe hain user ID ke liye
+        // FIX: Subscription Listener
         rtdb.ref('activeSubscriptions/' + u.uid).on('value', snap => {
-            const promoBtn = document.getElementById("myPromoLink");
             const sub = snap.val();
-            
-            if(sub && sub.status === 'active') {
-                const expiry = new Date(sub.expiryDate);
-                if(expiry > new Date()) {
-                    promoBtn.style.setProperty('display', 'block', 'important'); // Forced show
-                    document.getElementById("subInfo").innerHTML = `<b>Plan:</b> ${sub.package} <br> <b>Expires:</b> ${expiry.toLocaleDateString()}`;
-                    document.getElementById("channelInputSection").classList.toggle("hidden", !sub.package.includes("Premium"));
-                    loadUserSubmittedLinks(u.uid);
-                } else {
-                    promoBtn.style.display = "none";
-                }
+            const btn = document.getElementById("myPromoLink");
+            if(sub) {
+                btn.style.display = "block"; // Show button if data exists
+                document.getElementById("subInfo").innerText = "Plan: " + sub.package + " | Expiry: " + sub.expiryDate;
+                if(sub.package.includes("Premium")) document.getElementById("channelInputSection").classList.remove("hidden");
+                loadUserHistory(u.uid);
             } else {
-                promoBtn.style.display = "none";
+                btn.style.display = "none";
             }
         });
-        loadTasks();
+
     } else {
         document.getElementById("landingPage").classList.remove("hidden");
         document.getElementById("dashboard").classList.add("hidden");
-        document.getElementById("myPromoLink").style.display = "none";
     }
 });
+
+function handleLogin() { auth.signInWithEmailAndPassword(lEmail.value, lPass.value).catch(e => alert(e.message)); }
 
 async function loadTasks() {
     const list = document.getElementById("taskList"); list.innerHTML = "";
     const vS = await db.collection("videos").get();
-    vS.forEach(doc => { const v = doc.data(); if(v.enabled) list.innerHTML += `<div class="card" style="display:flex; justify-content:space-between;">Video Task ${v.slot} <button onclick="playVideo('${v.link}')" style="width:auto">Watch</button></div>`; });
+    const completed = (userDataGlobal.completed || "").split(",");
+    vS.forEach(doc => {
+        const v = doc.data();
+        if(v.enabled && !completed.includes("slot"+v.slot)) {
+            list.innerHTML += `<div class="card" style="display:flex; justify-content:space-between;">Video Task ${v.slot} <button onclick="playVideo('${v.link}', 'slot${v.slot}')" style="width:auto; padding:5px 15px;">Watch</button></div>`;
+        }
+    });
 }
 
-function showPromoHub() { 
-    toggleMenu(); 
-    document.getElementById("dashboard").classList.add("hidden"); 
-    document.getElementById("promoHub").classList.remove("hidden"); 
-}
-
-function closePromoHub() { 
-    document.getElementById("promoHub").classList.add("hidden"); 
-    document.getElementById("dashboard").classList.remove("hidden"); 
-}
-
+function showPromoHub() { toggleMenu(); document.getElementById("dashboard").classList.add("hidden"); document.getElementById("promoHub").classList.remove("hidden"); }
+function closePromoHub() { document.getElementById("promoHub").classList.add("hidden"); document.getElementById("dashboard").classList.remove("hidden"); }
 function openPromoTab() { toggleMenu(); window.scrollTo(0, document.getElementById("pkgSection").offsetTop); }
-function openPromo(p, pr) { if(!auth.currentUser) return alert("Login first"); promoTitle.innerText=p; promoPopup.style.display='flex'; }
-function submitPromo() { rtdb.ref('promotionRequests').push({uid:auth.currentUser.uid, email:auth.currentUser.email, trxId:promoTrx.value, package:promoTitle.innerText, status:'pending'}).then(()=>alert("Pending Approval")); promoPopup.style.display='none'; }
+function openPromo(p, pr) { if(!auth.currentUser) return alert("Login First"); promoTitle.innerText = p; promoPrice.innerText = pr; document.getElementById("promoPopup").style.display = "flex"; }
+
+function submitPromo() {
+    rtdb.ref('promotionRequests').push({
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email,
+        package: promoTitle.innerText,
+        trx: promoTrx.value,
+        status: 'pending'
+    }).then(() => { alert("Request Sent!"); document.getElementById("promoPopup").style.display = "none"; });
+}
 
 function submitUserContent(type) {
-    const input = type === 'video' ? document.getElementById("vLinkInput") : document.getElementById("cLinkInput");
-    if(!input.value) return;
-    rtdb.ref(`userSubmittedLinks/${auth.currentUser.uid}/${type}s`).push({ url: input.value, status: 'pending' }).then(() => { input.value = ""; alert("Submitted!"); });
+    const val = type === 'video' ? vLinkInput.value : cLinkInput.value;
+    if(!val) return;
+    rtdb.ref(`userSubmittedLinks/${auth.currentUser.uid}/${type}s`).push({ url: val, status: 'pending' })
+    .then(() => { alert("Submitted!"); vLinkInput.value = ""; cLinkInput.value = ""; });
 }
 
-function loadUserSubmittedLinks(uid) {
+function loadUserHistory(uid) {
     rtdb.ref('userSubmittedLinks/' + uid).on('value', snap => {
-        const list = document.getElementById("userLinksList"); list.innerHTML = "";
-        if(!snap.exists()) return;
+        const div = document.getElementById("userLinksList"); div.innerHTML = "";
         snap.forEach(child => {
             Object.values(child.val()).forEach(item => {
-                list.innerHTML += `<div style="padding:5px; border-bottom:1px solid #334155;">${item.url} - [${item.status}]</div>`;
+                div.innerHTML += `<div style="border-bottom:1px solid #334155; padding:5px;">${item.url} - <span style="color:#ffd700">${item.status}</span></div>`;
             });
         });
     });
 }
 
-// Player logic
 let player, vTime, watchTimer;
-function playVideo(u) { document.getElementById("videoPopup").style.display = "flex"; vTime = 18; const id = u.split('v=')[1]?.split('&')[0]; if(player) player.loadVideoById(id); else player = new YT.Player('player', { height: '200', width: '100%', videoId: id, events: { 'onStateChange': e => { if(e.data == 1) startT(); } } }); }
-function startT() { clearInterval(watchTimer); watchTimer = setInterval(() => { vTime--; timerDisplay.innerText = vTime+"s"; if(vTime<=0){ clearInterval(watchTimer); rtdb.ref('users/'+auth.currentUser.uid).once('value', s => { rtdb.ref('users/'+auth.currentUser.uid).update({watch: (s.val().watch||0)+1}); videoPopup.style.display='none'; player.stopVideo(); }); } }, 1000); }
+function playVideo(url, sid) {
+    currentSlot = sid; vTime = 18; document.getElementById("videoPopup").style.display = "flex";
+    const vidId = url.split('v=')[1]?.split('&')[0];
+    if(player) player.loadVideoById(vidId);
+    else player = new YT.Player('player', { height: '200', width: '100%', videoId: vidId, events: { 'onStateChange': e => { if(e.data == 1) startT(); } } });
+}
+function startT() {
+    clearInterval(watchTimer);
+    watchTimer = setInterval(() => {
+        vTime--; timerDisplay.innerText = vTime+"s";
+        if(vTime <= 0) {
+            clearInterval(watchTimer);
+            rtdb.ref('users/'+auth.currentUser.uid).update({
+                watch: (userDataGlobal.watch || 0) + 1,
+                completed: (userDataGlobal.completed || "") + "," + currentSlot
+            });
+            document.getElementById("videoPopup").style.display = "none";
+            player.stopVideo();
+        }
+    }, 1000);
+}
 </script>
 </body>
 </html>
