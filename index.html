@@ -14,34 +14,43 @@
     <style>
         :root { --primary: #1976d2; --dark: #0f172a; --success: #28a745; --bg-gradient: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
         body { font-family: 'Poppins', sans-serif; margin: 0; background: var(--bg-gradient); color: #e2e8f0; min-height: 100vh; overflow-x: hidden; }
-        #sidebar { width: 280px; background: #1e293b; color: white; height: 100vh; padding: 20px; position: fixed; left: -280px; top: 0; box-sizing: border-box; overflow-y: auto; z-index: 2000; transition: 0.3s ease-in-out; border-right: 1px solid #334155; }
+        
+        /* Sidebar Styling */
+        #sidebar { 
+            width: 280px; background: #1e293b; color: white; height: 100vh; 
+            padding: 20px; position: fixed; left: -280px; top: 0; 
+            box-sizing: border-box; overflow-y: auto; z-index: 2000; 
+            transition: 0.3s ease-in-out; border-right: 1px solid #334155;
+        }
         #sidebar.open { left: 0; }
         .sidebar-link { display: block; padding: 12px; color: #60a5fa; text-decoration: none; border-bottom: 1px solid #334155; font-weight: bold; cursor: pointer; }
         #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1999; }
         #overlay.active { display: block; }
+
+        /* General UI */
         .btn-main { background: #ffc107; color: #333; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; display: inline-block; transition: 0.3s; cursor: pointer; border:none; }
         .container { max-width: 1100px; margin: auto; padding: 20px; }
         .section-title { text-align: center; margin: 50px 0 30px; font-size: 2rem; color: #60a5fa; }
         .card { background: #1e293b; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #334155; }
         .hidden { display: none !important; }
-        .hero { background: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), url('https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?auto=format&fit=crop&q=80&w=1200'); background-size: cover; color: white; padding: 100px 20px; text-align: center; }
-        
-        /* Package Design */
+
+        /* Package Cards */
         .pkg-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 30px 0; }
         .pkg-card { position: relative; background: #1e293b; border: 2px solid #334155; border-radius: 20px; padding: 30px 20px; text-align: center; transition: 0.3s; }
         .pkg-card.gold { border-color: #ffd700; box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
         .pkg-card.premium { border-color: #00d2ff; box-shadow: 0 0 15px rgba(0, 210, 255, 0.2); }
-        .pkg-card:hover { transform: translateY(-10px); }
         .pkg-badge { position: absolute; top: 10px; right: -10px; background: #ff4757; color: white; padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: bold; }
         .pkg-price { font-size: 2rem; font-weight: bold; color: white; margin: 15px 0; }
         .pkg-list { list-style: none; padding: 0; margin: 20px 0; text-align: left; font-size: 14px; }
         .pkg-list li { margin-bottom: 10px; }
         .pkg-list li i { color: #2ecc71; margin-right: 8px; }
 
-        .btn-google { background: white; color: #444; width: 100%; padding: 10px; border-radius: 8px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 15px; cursor: pointer; border: 1px solid #ddd; }
+        /* Dashboard & Top Bar */
         .top-bar { background: #1e293b; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #334155; }
         .stat-box { background: #334155; padding: 15px; border-radius: 10px; flex: 1; text-align: center; cursor: pointer; }
         .video-item { background: #1e293b; padding: 15px; border-radius: 10px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary); }
+
+        /* Inputs & Popups */
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: white; box-sizing: border-box; }
         button { width: 100%; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; border: none; background: var(--primary); color: white; }
         .popup { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; overflow-y: auto; }
@@ -56,20 +65,20 @@
         <button onclick="toggleMenu()" style="width: auto; background: none; color: white; font-size: 20px;">×</button>
     </div>
     <hr style="border: 0.5px solid #334155; margin: 15px 0;">
-    
     <div id="sidebarUserInfo">
         <div style="padding:10px; background:#0f172a; border-radius:8px; margin-bottom:15px;">
             <label style="font-size:10px; color:#94a3b8">Email Address</label>
-            <div id="displayEmail" style="font-size:14px">Guest User</div>
+            <div id="displayEmail" style="font-size:14px">Guest</div>
         </div>
         <div style="padding:10px; background:#0f172a; border-radius:8px; margin-bottom:15px; border-left: 4px solid #28a745;">
             <label style="font-size:10px; color:#94a3b8">Total Balance</label>
             <div style="font-size:22px; font-weight:bold; color:#28a745">Rs <span id="totalBalance">0.00</span></div>
         </div>
     </div>
-
+    
     <a class="sidebar-link" onclick="openPromoTab()"><i class="fas fa-rocket"></i> Buy Promotion</a>
-    <button id="signOutBtn" onclick="auth.signOut()" style="background:#ef4444; margin-top: 30px;" class="hidden">Sign Out</button>
+    <button onclick="applyWithdraw()" style="background:#28a745; margin-top:10px;">Withdraw Now</button>
+    <button onclick="auth.signOut()" style="background:#ef4444; margin-top: 30px;">Sign Out</button>
 </div>
 
 <div id="landingPage">
@@ -89,10 +98,9 @@
                 <ul class="pkg-list">
                     <li><i class="fas fa-check"></i> Daily 10 Video Views</li>
                     <li><i class="fas fa-check"></i> Real Human Traffic</li>
-                    <li><i class="fas fa-check"></i> High Retention</li>
                     <li><i class="fas fa-check"></i> 30 Days Service</li>
                 </ul>
-                <button onclick="openPromo('Gold Monthly Package', 300)" style="background:#ffd700; color:#000">Select Gold</button>
+                <button onclick="openPromo('Gold Monthly Package', 300)" style="background:#ffd700; color:#000">Choose Gold</button>
             </div>
 
             <div class="pkg-card premium">
@@ -102,18 +110,17 @@
                 <ul class="pkg-list">
                     <li><i class="fas fa-check"></i> Daily 15 Video Views</li>
                     <li><i class="fas fa-check"></i> Daily 5 Real Subscribers</li>
-                    <li><i class="fas fa-check"></i> 100% Monetization Safe</li>
-                    <li><i class="fas fa-check"></i> 30 Days Service</li>
+                    <li><i class="fas fa-check"></i> 30 Days Full Access</li>
                 </ul>
-                <button onclick="openPromo('Premium Monthly Package', 500)" style="background:#00d2ff; color:#000">Select Premium</button>
+                <button onclick="openPromo('Premium Monthly Package', 500)" style="background:#00d2ff; color:#000">Choose Premium</button>
             </div>
         </div>
 
         <h2 class="section-title">How to Earn Money?</h2>
-        <div class="features">
-            <div class="feat-card"><i class="fab fa-youtube" style="font-size:2rem; color:#ef4444"></i><h3>Watch Videos</h3><p>Simple 18-second videos dekhein aur foran earning karein.</p></div>
-            <div class="feat-card"><i class="fas fa-users" style="font-size:2rem; color:#60a5fa"></i><h3>Refer Friends</h3><p>Apne doston ko join karwayein aur Rs 10 tak per referral kamayein.</p></div>
-            <div class="feat-card"><i class="fas fa-check-circle" style="font-size:2rem; color:#22c55e"></i><h3>Daily Withdraw</h3><p>Easypaisa aur Jazzcash mein daily payments hasil karein.</p></div>
+        <div class="features" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            <div class="feat-card" style="background:#1e293b; padding:30px; border-radius:15px; text-align:center; border:1px solid #334155;"><i class="fab fa-youtube" style="font-size:2rem; color:#ef4444"></i><h3>Watch Videos</h3><p>Simple 18-second videos dekhein aur foran earning karein.</p></div>
+            <div class="feat-card" style="background:#1e293b; padding:30px; border-radius:15px; text-align:center; border:1px solid #334155;"><i class="fas fa-users" style="font-size:2rem; color:#60a5fa"></i><h3>Refer Friends</h3><p>Apne doston ko join karwayein aur Rs 10 tak per referral kamayein.</p></div>
+            <div class="feat-card" style="background:#1e293b; padding:30px; border-radius:15px; text-align:center; border:1px solid #334155;"><i class="fas fa-check-circle" style="font-size:2rem; color:#22c55e"></i><h3>Daily Withdraw</h3><p>Easypaisa aur Jazzcash mein daily payments hasil karein.</p></div>
         </div>
 
         <div id="authBox" class="card" style="max-width: 450px; margin: 80px auto; padding: 30px;">
@@ -126,9 +133,6 @@
                 <input id="lEmail" placeholder="Email Address">
                 <input id="lPass" type="password" placeholder="Password">
                 <button onclick="handleLogin()">Sign In</button>
-                <button class="btn-google" onclick="handleGoogleLogin()">
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" width="18"> Continue with Google
-                </button>
             </div>
             <div id="registerForm" class="hidden">
                 <input id="rName" placeholder="Full Name">
@@ -166,52 +170,23 @@
         <p style="color:#2ecc71; font-weight:bold; font-size:1.2rem;">Total Payable: <span id="promoPrice">0</span> PKR</p>
         
         <div style="background:#0f172a; padding:15px; border-radius:10px; margin:15px 0; font-size:13px; line-height:1.6; border: 1px solid #334155;">
-            <strong style="color:#ffd700">Payment Details:</strong><br><br>
-            <strong>Option 1: Easypaisa</strong><br>
-            Account: 0342-3944508<br>
-            Name: Muluk Hussain<br><hr style="border-color:#334155">
-            <strong>Option 2: Bank Transfer (NBP)</strong><br>
-            Bank Name: National Bank Of Pakistan<br>
-            Title: Muluk Hussain<br>
-            Account: 03513045624812<br>
-            IBAN: PK21NBPA0351003045624812<br>
-            Code: 0351
+            <strong style="color:#ffd700">Payment Details:</strong><br>
+            Option 1: <strong>Easypaisa</strong> (0342-3944508 | Muluk Hussain)<br>
+            Option 2: <strong>Bank NBP</strong> (03513045624812 | Muluk Hussain)
         </div>
 
-        <input type="email" id="promoEmail" placeholder="Your Email Address (For Contact)">
-        <input type="text" id="promoLink" placeholder="YouTube Channel/Video Link">
-        <input type="text" id="promoTrx" placeholder="Transaction ID (Trx ID)">
+        <input id="promoEmail" placeholder="Email Address">
+        <input id="promoLink" placeholder="YouTube Link">
+        <input id="promoTrx" placeholder="Transaction ID (Trx ID)">
         
         <button onclick="submitPromo()" style="background:#28a745; margin-bottom:10px;">Submit Order</button>
         <button onclick="document.getElementById('promoPopup').style.display='none'" style="background:none; color:#aaa;">Cancel</button>
     </div>
 </div>
 
-<div class="popup" id="withdrawPopup">
-    <div class="card" style="width:90%; max-width: 400px;">
-        <h3>Withdraw Funds</h3>
-        <select id="wMethod"><option value="Easypaisa">Easypaisa</option><option value="JazzCash">JazzCash</option><option value="Bank">Bank Transfer</option></select>
-        <input type="text" id="wNumber" placeholder="Account Number">
-        <input type="number" id="wAmount" placeholder="Amount (Min 100)">
-        <input type="text" id="wName" placeholder="Account Holder Name">
-        <button onclick="submitWithdrawRequest()" style="background:#28a745; margin-bottom:10px;">Submit</button>
-        <button onclick="document.getElementById('withdrawPopup').style.display='none'" style="background:none;">Close</button>
-    </div>
-</div>
-
-<div class="popup" id="linkPopup">
-    <div class="card" style="width:90%; max-width: 400px;">
-        <h4>Submit Proof Link</h4>
-        <input type="text" id="proofLink" placeholder="ibb.co screenshot link">
-        <button onclick="submitManualLink()" style="background:#28a745; margin-bottom:10px;">Submit Proof</button>
-        <button onclick="document.getElementById('linkPopup').style.display='none'" style="background:none;">Cancel</button>
-    </div>
-</div>
-
-<div class="popup" id="videoPopup">
-    <div id="timerDisplay" style="color:#ffeb3b; font-size:24px; margin-bottom:10px;">18s</div>
-    <div id="player"></div>
-</div>
+<div class="popup" id="withdrawPopup"><div class="card" style="width:90%; max-width: 400px;"><h3>Withdraw</h3><select id="wMethod"><option value="Easypaisa">Easypaisa</option><option value="JazzCash">JazzCash</option></select><input type="text" id="wNumber" placeholder="Account Number"><input type="number" id="wAmount" placeholder="Amount (Min 100)"><input type="text" id="wName" placeholder="Holder Name"><button onclick="submitWithdrawRequest()" style="background:#28a745; margin-bottom:10px;">Submit</button><button onclick="document.getElementById('withdrawPopup').style.display='none'" style="background:none;">Close</button></div></div>
+<div class="popup" id="linkPopup"><div class="card" style="width:90%; max-width: 400px;"><h4>Submit Proof</h4><input type="text" id="proofLink" placeholder="ibb.co link"><button onclick="submitManualLink()" style="background:#28a745; margin-bottom:10px;">Submit</button><button onclick="document.getElementById('linkPopup').style.display='none'" style="background:none;">Cancel</button></div></div>
+<div class="popup" id="videoPopup"><div id="timerDisplay" style="color:#ffeb3b; font-size:24px; margin-bottom:10px;">18s</div><div id="player"></div></div>
 
 <script>
 const firebaseConfig = {
@@ -223,58 +198,22 @@ const firebaseConfig = {
   appId: "1:132045886996:web:8a6d937c3548afd2477901"
 };
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-const rtdb = firebase.database();
+const auth = firebase.auth(); const db = firebase.firestore(); const rtdb = firebase.database();
 
-let userDataGlobal = null;
-let currentTotalBalance = 0;
-let currentSlot = "";
-let selectedPkgName = "";
+let userDataGlobal = null; let currentTotalBalance = 0; let currentSlot = ""; let selectedPkg = "";
 
 function toggleMenu() { document.getElementById("sidebar").classList.toggle("open"); document.getElementById("overlay").classList.toggle("active"); }
+function switchAuth(mode) { if(mode === 'login') { document.getElementById("loginForm").classList.remove("hidden"); document.getElementById("registerForm").classList.add("hidden"); } else { document.getElementById("loginForm").classList.add("hidden"); document.getElementById("registerForm").classList.remove("hidden"); } }
 
-function switchAuth(mode) {
-    if(mode === 'login') { document.getElementById("loginForm").classList.remove("hidden"); document.getElementById("registerForm").classList.add("hidden"); }
-    else { document.getElementById("loginForm").classList.add("hidden"); document.getElementById("registerForm").classList.remove("hidden"); }
-}
-
-function handleGoogleLogin() {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).then(res => {
-        const u = res.user;
-        rtdb.ref('users/' + u.uid).once('value', s => {
-            if(!s.exists()) {
-                rtdb.ref('users/' + u.uid).set({ email: u.email, name: u.displayName, watch: 0, subPoints: 0, bonus: 0, withdrawnAmount: 0, status: 'active' });
-            }
-        });
-    }).catch(e => alert(e.message));
-}
-
-function handleLogin() {
-    const e = document.getElementById("lEmail").value;
-    const p = document.getElementById("lPass").value;
-    if(!e || !p) return alert("Enter credentials");
-    auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message));
-}
-
-function handleRegister() {
-    const n = document.getElementById("rName").value;
-    const e = document.getElementById("rEmail").value;
-    const p = document.getElementById("rPass").value;
-    if(!n || !e || p.length < 6) return alert("Fill all details correctly");
-    auth.createUserWithEmailAndPassword(e, p).then(cred => {
-        rtdb.ref('users/' + cred.user.uid).set({ email: e, name: n, watch: 0, subPoints: 0, bonus: 0, withdrawnAmount: 0, status: 'active', password: p });
-    }).catch(err => alert(err.message));
-}
+function handleLogin() { const e = document.getElementById("lEmail").value, p = document.getElementById("lPass").value; if(!e || !p) return alert("Enter details"); auth.signInWithEmailAndPassword(e, p).catch(err => alert(err.message)); }
+function handleRegister() { const n = document.getElementById("rName").value, e = document.getElementById("rEmail").value, p = document.getElementById("rPass").value; if(!n || !e || p.length < 6) return alert("Check fields"); auth.createUserWithEmailAndPassword(e, p).then(cred => { rtdb.ref('users/' + cred.user.uid).set({ email: e, name: n, watch: 0, subPoints: 0, bonus: 0, withdrawnAmount: 0, status: 'active' }); }).catch(err => alert(err.message)); }
 
 auth.onAuthStateChanged(user => {
     if(user){
         document.getElementById("landingPage").classList.add("hidden");
-        document.getElementById("signOutBtn").classList.remove("hidden");
         rtdb.ref('users/' + user.uid).on('value', snap => {
             userDataGlobal = snap.val() || {};
-            if(userDataGlobal.status === "disabled") { auth.signOut(); alert("Banned!"); window.location.reload(); return; }
+            if(userDataGlobal.status === "disabled") { auth.signOut(); alert("Banned!"); return; }
             document.getElementById("dashboard").classList.remove("hidden");
             document.getElementById("displayEmail").innerText = user.email;
             document.getElementById("promoEmail").value = user.email;
@@ -283,15 +222,11 @@ auth.onAuthStateChanged(user => {
     } else {
         document.getElementById("landingPage").classList.remove("hidden");
         document.getElementById("dashboard").classList.add("hidden");
-        document.getElementById("signOutBtn").classList.add("hidden");
-        document.getElementById("displayEmail").innerText = "Guest User";
     }
 });
 
 function renderDashboard() {
-    let w = (userDataGlobal.watch || 0) * 0.38;
-    let s = (userDataGlobal.subPoints || 0) * 0.60;
-    let b = (userDataGlobal.bonus || 0);
+    let w = (userDataGlobal.watch || 0) * 0.38, s = (userDataGlobal.subPoints || 0) * 0.60, b = (userDataGlobal.bonus || 0);
     currentTotalBalance = (w + s + b) - (userDataGlobal.withdrawnAmount || 0);
     document.getElementById("watchPkr").innerText = w.toFixed(2);
     document.getElementById("subPkr").innerText = s.toFixed(2);
@@ -302,64 +237,41 @@ function renderDashboard() {
 }
 
 async function loadTasks() {
-    const comp = userDataGlobal.completed || "";
-    const proofs = userDataGlobal.proofs || {};
-    const list = document.getElementById("taskList");
-    let html = "";
+    const comp = userDataGlobal.completed || ""; const proofs = userDataGlobal.proofs || {}; const list = document.getElementById("taskList"); let html = "";
     const cS = await db.collection("channels").get();
-    cS.forEach(doc => {
-        const c = doc.data(); const cid = "chan" + c.slot;
-        if(c.enabled && !comp.includes(cid) && !proofs[cid]) html += `<div class="video-item" style="border-left:5px solid #2ecc71"><span>Sub Task ${c.slot}</span><button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#2ecc71">Subscribe</button></div>`;
-    });
+    cS.forEach(doc => { const c = doc.data(), cid = "chan" + c.slot; if(c.enabled && !comp.includes(cid) && !proofs[cid]) html += `<div class="video-item" style="border-left:5px solid #28a745"><span>Sub Task ${c.slot}</span><button onclick="openLinkBox('${c.link}','${cid}')" style="width:auto; background:#28a745">Subscribe</button></div>`; });
     const vS = await db.collection("videos").get();
-    vS.forEach(doc => {
-        const v = doc.data(); const sid = "slot" + v.slot;
-        if(v.enabled && !comp.includes(sid)) html += `<div class="video-item"><span>Video Task ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`;
-    });
-    list.innerHTML = html || "<p style='text-align:center'>No tasks available</p>";
+    vS.forEach(doc => { const v = doc.data(), sid = "slot" + v.slot; if(v.enabled && !comp.includes(sid)) html += `<div class="video-item"><span>Video Task ${v.slot}</span><button onclick="playVideo('${v.link}','${sid}')" style="width:auto">Watch</button></div>`; });
+    list.innerHTML = html || "<p style='text-align:center'>No tasks!</p>";
 }
 
-function openPromo(pkg, price) {
-    selectedPkgName = pkg;
-    document.getElementById("promoTitle").innerText = pkg;
-    document.getElementById("promoPrice").innerText = price;
-    document.getElementById("promoPopup").style.display = "flex";
-}
-
-function openPromoTab() { toggleMenu(); document.getElementById("landingPage").classList.remove("hidden"); document.getElementById("dashboard").classList.add("hidden"); window.scrollTo(0, 500); }
-
+// Package Logic
+function openPromo(pkg, price) { selectedPkg = pkg; document.getElementById("promoTitle").innerText = pkg; document.getElementById("promoPrice").innerText = price; document.getElementById("promoPopup").style.display = "flex"; }
+function openPromoTab() { toggleMenu(); document.getElementById("landingPage").classList.remove("hidden"); document.getElementById("dashboard").classList.add("hidden"); window.scrollTo(0, 400); }
 function submitPromo() {
-    const email = document.getElementById("promoEmail").value;
-    const link = document.getElementById("promoLink").value;
-    const trx = document.getElementById("promoTrx").value;
-    if(!email || !link || !trx) return alert("Fill all details");
-    rtdb.ref('promotionRequests').push({ email, link, trxId: trx, package: selectedPkgName, status: 'pending', date: new Date().toLocaleString() }).then(() => {
-        alert("Request Submitted! Admin will review soon."); document.getElementById("promoPopup").style.display = 'none';
+    const e = document.getElementById("promoEmail").value, l = document.getElementById("promoLink").value, t = document.getElementById("promoTrx").value;
+    if(!e || !l || !t) return alert("Fill all fields");
+    rtdb.ref('promotionRequests').push({ email: e, link: l, trxId: t, package: selectedPkg, date: new Date().toLocaleString() }).then(() => {
+        alert("Order Submitted!"); document.getElementById("promoPopup").style.display = 'none';
     });
 }
 
 function applyWithdraw() { if(currentTotalBalance < 100) return alert("Min Rs 100"); document.getElementById("withdrawPopup").style.display = "flex"; }
 function submitWithdrawRequest() {
     const m = document.getElementById("wMethod").value, n = document.getElementById("wNumber").value, a = parseFloat(document.getElementById("wAmount").value), h = document.getElementById("wName").value;
-    if(!n || isNaN(a) || !h || a < 100) return alert("Check fields");
-    const id = Date.now();
-    rtdb.ref('withdrawRequests/' + id).set({ uid: auth.currentUser.uid, email: auth.currentUser.email, amount: a, details: `${m} | ${n} | ${h}`, status: 'pending' }).then(() => {
+    if(!n || isNaN(a) || a < 100) return alert("Check fields");
+    rtdb.ref('withdrawRequests/' + Date.now()).set({ uid: auth.currentUser.uid, email: auth.currentUser.email, amount: a, details: `${m}|${n}|${h}`, status: 'pending' }).then(() => {
         rtdb.ref('users/' + auth.currentUser.uid).update({ withdrawnAmount: (userDataGlobal.withdrawnAmount || 0) + a });
         document.getElementById("withdrawPopup").style.display = "none"; alert("Submitted!");
     });
 }
 
 let player, vTime, watchTimer;
-function playVideo(url, sid) {
-    currentSlot = sid; vTime = 18; document.getElementById("videoPopup").style.display = "flex";
-    const vidId = url.split('v=')[1]?.split('&')[0];
-    if(player) player.loadVideoById(vidId);
-    else player = new YT.Player('player', { height: '250', width: '100%', videoId: vidId, events: { 'onStateChange': e => { if(e.data == 1) startT(); else clearInterval(watchTimer); } } });
-}
+function playVideo(url, sid) { currentSlot = sid; vTime = 18; document.getElementById("videoPopup").style.display = "flex"; const vidId = url.split('v=')[1]?.split('&')[0]; if(player) player.loadVideoById(vidId); else player = new YT.Player('player', { height: '250', width: '100%', videoId: vidId, events: { 'onStateChange': e => { if(e.data == 1) startT(); else clearInterval(watchTimer); } } }); }
 function startT() { clearInterval(watchTimer); watchTimer = setInterval(() => { vTime--; document.getElementById("timerDisplay").innerText = vTime + "s"; if(vTime <= 0) { clearInterval(watchTimer); saveWatch(); } }, 1000); }
 function saveWatch() { rtdb.ref('users/' + auth.currentUser.uid).once('value', s => { const d = s.val(); rtdb.ref('users/' + auth.currentUser.uid).update({ watch: (d.watch || 0) + 1, completed: (d.completed || "") + "," + currentSlot }); document.getElementById("videoPopup").style.display = "none"; player.stopVideo(); }); }
 function openLinkBox(l, c) { window.open(l, '_blank'); currentSlot = c; document.getElementById("linkPopup").style.display = "flex"; }
-function submitManualLink() { const v = document.getElementById("proofLink").value; if(!v) return; rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(v).then(() => { alert("Sent!"); document.getElementById("linkPopup").style.display = "none"; }); }
+function submitManualLink() { const v = document.getElementById("proofLink").value; if(!v) return; rtdb.ref('users/' + auth.currentUser.uid + '/proofs/' + currentSlot).set(v).then(() => { alert("Proof Sent!"); document.getElementById("linkPopup").style.display = "none"; }); }
 </script>
 </body>
 </html>
