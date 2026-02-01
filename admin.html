@@ -12,37 +12,22 @@
     <style>
         :root { --primary: #1976d2; --dark: #0f172a; --sidebar-w: 260px; }
         body { margin: 0; font-family: 'Segoe UI', sans-serif; background: #f4f7fe; display: flex; }
-        
-        /* Sidebar */
         #sidebar { width: var(--sidebar-w); background: var(--dark); color: white; height: 100vh; position: fixed; z-index: 1000; }
         .sidebar-header { padding: 20px; text-align: center; background: #1e293b; font-weight: bold; border-bottom: 1px solid #334155; }
         .nav-link { padding: 15px 25px; display: block; color: #cbd5e1; text-decoration: none; border-bottom: 1px solid #1e293b; }
-        .nav-link:hover { background: #334155; color: white; }
-
-        /* Main Content */
         #main { flex: 1; margin-left: var(--sidebar-w); padding: 20px; width: calc(100% - var(--sidebar-w)); }
-        header { background: white; padding: 15px 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 30px; }
-        
         .card { background: white; padding: 25px; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-        h3 { margin-top: 0; color: var(--dark); border-bottom: 2px solid #f0f0f0; padding-bottom: 10px; }
-
-        /* Tables */
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
         th { background: #f8fafc; color: #64748b; text-transform: uppercase; font-size: 11px; }
-        
-        /* Buttons & Inputs */
         .btn { padding: 6px 10px; border-radius: 6px; cursor: pointer; border: none; font-size: 11px; font-weight: 600; margin: 2px; }
         .btn-green { background: #10b981; color: white; }
         .btn-red { background: #ef4444; color: white; }
         .btn-blue { background: #3b82f6; color: white; }
         .btn-orange { background: #f59e0b; color: white; }
-        .slot-input { width: 70%; padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 6px; }
-
         .badge { padding: 4px 8px; border-radius: 20px; font-size: 10px; font-weight: bold; }
         .bg-active { background: #dcfce7; color: #15803d; }
         .bg-disabled { background: #fee2e2; color: #b91c1c; }
-        
         .hidden { display: none !important; }
         #authBox { max-width: 400px; margin: 100px auto; background: white; padding: 30px; border-radius: 15px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         #authBox input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
@@ -51,7 +36,6 @@
 <body>
 
 <div id="authBox">
-    <i class="fas fa-user-shield" style="font-size: 3rem; color: var(--primary); margin-bottom: 15px;"></i>
     <h2>Admin Login</h2>
     <input type="email" id="adminEmail" placeholder="Email">
     <input type="password" id="adminPass" placeholder="Password">
@@ -61,73 +45,63 @@
 <div id="adminContent" class="hidden">
     <div id="sidebar">
         <div class="sidebar-header">SMART EARN PANEL</div>
-        <a href="#usersSection" class="nav-link"><i class="fas fa-users"></i> Manage Users</a>
-        <a href="#withdrawSection" class="nav-link"><i class="fas fa-wallet"></i> Withdrawals</a>
-        <a href="#tasksSection" class="nav-link"><i class="fas fa-tasks"></i> Task Links</a>
-        <div style="padding: 20px;">
-            <button onclick="firebase.auth().signOut()" class="btn btn-red" style="width:100%">Logout</button>
-        </div>
+        <a href="#usersSection" class="nav-link">Manage Users</a>
+        <a href="#promoSection" class="nav-link">Ads Requests</a>
+        <a href="#withdrawSection" class="nav-link">Withdrawals</a>
+        <a href="#tasksSection" class="nav-link">Tasks</a>
+        <div style="padding: 20px;"><button onclick="firebase.auth().signOut()" class="btn btn-red" style="width:100%">Logout</button></div>
     </div>
 
     <div id="main">
-        <header>
-            <div style="font-size: 1.5rem; font-weight: bold;">Control Center</div>
-        </header>
+        <header><div style="font-size: 1.5rem; font-weight: bold;">Control Center</div></header>
+
+        <div id="promoSection" class="card">
+            <h3><i class="fas fa-ad"></i> Ads & Promotion Requests</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Package</th>
+                        <th>Trx ID</th>
+                        <th>Link</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="promoList"><tr><td colspan="5">No active requests.</td></tr></tbody>
+            </table>
+        </div>
 
         <div id="withdrawSection" class="card">
-            <h3><i class="fas fa-money-bill-wave"></i> Pending Withdrawals</h3>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User Email</th>
-                            <th>Amount (Rs)</th>
-                            <th>Details</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="withdrawList"><tr><td colspan="4">No pending requests.</td></tr></tbody>
-                </table>
-            </div>
+            <h3>Pending Withdrawals</h3>
+            <table>
+                <thead>
+                    <tr><th>User</th><th>Amount</th><th>Details</th><th>Actions</th></tr>
+                </thead>
+                <tbody id="withdrawList"></tbody>
+            </table>
         </div>
 
         <div id="usersSection" class="card">
-            <h3><i class="fas fa-user-cog"></i> User Management</h3>
-            <div style="overflow-x:auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>User Info</th>
-                            <th>Credentials</th>
-                            <th>Vault Balance</th>
-                            <th>Status</th>
-                            <th>Proofs</th>
-                            <th>Control</th>
-                        </tr>
-                    </thead>
-                    <tbody id="usersList"><tr><td colspan="6">Loading users...</td></tr></tbody>
-                </table>
-            </div>
+            <h3>User Management</h3>
+            <table>
+                <thead>
+                    <tr><th>User Info</th><th>Credentials</th><th>Vault Details</th><th>Status</th><th>Proofs</th><th>Control</th></tr>
+                </thead>
+                <tbody id="usersList"></tbody>
+            </table>
         </div>
 
         <div id="tasksSection" class="card">
-            <h3><i class="fas fa-link"></i> Manage Task Slots</h3>
+            <h3>Manage Task Slots</h3>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <h4 style="color:var(--primary)">Video Slots (1-10)</h4>
-                    <div id="videoSlots"></div>
-                </div>
-                <div>
-                    <h4 style="color:#10b981">Channel Slots (1-5)</h4>
-                    <div id="channelSlots"></div>
-                </div>
+                <div id="videoSlots"></div>
+                <div id="channelSlots"></div>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyCbJantLTt7-Ifp6fTaf8vHBu-8rLVrlLQ",
   authDomain: "own-live-steam-web.firebaseapp.com",
@@ -151,7 +125,8 @@ auth.onAuthStateChanged(user => {
         document.getElementById("adminContent").classList.remove("hidden");
         loadAdminData();
         loadWithdrawRequests();
-        initSlots(); // Task slots load karein
+        loadPromoRequests();
+        initSlots();
     } else {
         document.getElementById("authBox").classList.remove("hidden");
         document.getElementById("adminContent").classList.add("hidden");
@@ -160,113 +135,71 @@ auth.onAuthStateChanged(user => {
 
 function loadAdminData() {
     rtdb.ref('users').on('value', snap => {
-        const list = document.getElementById("usersList");
-        list.innerHTML = "";
+        const list = document.getElementById("usersList"); list.innerHTML = "";
         snap.forEach(child => {
-            const uid = child.key;
-            const u = child.val();
-            
-            // Balance Calculation
+            const uid = child.key; const u = child.val();
             let watchAmt = (u.watch || 0) * 0.38;
             let subAmt = (u.subPoints || 0) * 0.60;
-            let bonusAmt = (u.bonus || 0);
-            let totalVault = (watchAmt + subAmt + bonusAmt) - (u.withdrawnAmount || 0);
-
+            let totalVault = (watchAmt + subAmt + (u.bonus || 0)) - (u.withdrawnAmount || 0);
             const status = u.status !== "disabled";
-            const proofs = u.proofs || {};
-            const completed = u.completed || "";
-
+            
             let proofHtml = "";
-            Object.keys(proofs).forEach(cid => {
-                if(!completed.includes(cid)) {
-                    proofHtml += `<div style="margin-bottom:8px; background:#f8fafc; padding:5px; border-radius:5px">
-                        <small>Slot: ${cid}</small><br>
-                        <a href="${proofs[cid]}" target="_blank" style="color:blue; font-size:10px">Screenshot</a><br>
-                        <button class="btn btn-green" style="padding:2px 5px; font-size:9px" onclick="approveSub('${uid}','${cid}')">Approve</button>
-                    </div>`;
+            if(u.proofs) Object.keys(u.proofs).forEach(cid => {
+                if(!(u.completed || "").includes(cid)) {
+                    proofHtml += `<div style="font-size:10px; border:1px solid #ddd; padding:2px"><a href="${u.proofs[cid]}" target="_blank">View</a><br><button onclick="approveSub('${uid}','${cid}')">Ok</button></div>`;
                 }
             });
 
             list.innerHTML += `<tr>
-                <td><b>${u.name || 'User'}</b><br><small>${u.email}</small></td>
-                <td>
-                    <b>PW:</b> <span style="color:red">${u.password || 'Old User'}</span><br>
-                    <button class="btn btn-blue" style="font-size:9px" onclick="editPassword('${uid}')">Edit Pass</button>
-                </td>
-                <td>
-                    <div style="background:#e8f5e9; padding:5px; border-radius:5px; border-left:3px solid #2e7d32"><b>Rs ${totalVault.toFixed(2)}</b></div>
-                    <button class="btn btn-orange" style="font-size:9px" onclick="editVault('${uid}', ${u.bonus || 0})">Edit Balance</button>
+                <td><b>${u.name}</b><br>${u.email}</td>
+                <td><b>PW:</b> ${u.password || 'G-Login'}<br><button class="btn btn-blue" onclick="editPassword('${uid}')">Edit</button></td>
+                <td style="font-size:11px">
+                    Watch: ${u.watch || 0}<br>Subs: ${u.subPoints || 0}<br>Bonus: ${u.bonus || 0}<br>Withdrawn: ${u.withdrawnAmount || 0}<br>
+                    <b style="color:green">Net: Rs ${totalVault.toFixed(2)}</b><br>
+                    <button class="btn btn-orange" onclick="fullEditVault('${uid}')">Edit All</button>
                 </td>
                 <td><span class="badge ${status ? 'bg-active':'bg-disabled'}">${status ? 'ACTIVE':'DISABLED'}</span></td>
-                <td>${proofHtml || '<small>No Pending</small>'}</td>
-                <td>
-                    <button class="btn ${status ? 'btn-orange':'btn-green'}" onclick="toggleUser('${uid}', ${status})">${status ? 'Disable':'Enable'}</button>
-                    <button class="btn btn-red" onclick="deleteUser('${uid}')">Del</button>
-                </td>
+                <td>${proofHtml || 'Clear'}</td>
+                <td><button onclick="toggleUser('${uid}', ${status})">${status?'Disable':'Enable'}</button><button onclick="deleteUser('${uid}')">Del</button></td>
             </tr>`;
         });
     });
 }
 
-function initSlots() {
-    let vHtml = "";
-    for(let i=1; i<=10; i++) vHtml += `<div><input id="v${i}" class="slot-input" placeholder="Video Link ${i}"><button class="btn btn-blue" onclick="saveV(${i})">Save</button></div>`;
-    document.getElementById("videoSlots").innerHTML = vHtml;
-    
-    let cHtml = "";
-    for(let i=1; i<=5; i++) cHtml += `<div><input id="c${i}" class="slot-input" placeholder="Channel Link ${i}"><button class="btn btn-green" onclick="saveC(${i})">Save</button></div>`;
-    document.getElementById("channelSlots").innerHTML = cHtml;
-
-    // Load existing links from Firestore
-    for(let i=1; i<=10; i++) db.collection("videos").doc("slot"+i).get().then(d=>{if(d.exists)document.getElementById("v"+i).value=d.data().link;});
-    for(let i=1; i<=5; i++) db.collection("channels").doc("chan"+i).get().then(d=>{if(d.exists)document.getElementById("c"+i).value=d.data().link;});
-}
-
-function saveV(n){ db.collection("videos").doc("slot"+n).set({slot:n, link:document.getElementById("v"+n).value, enabled:true}).then(()=>alert("Video Saved!")); }
-function saveC(n){ db.collection("channels").doc("chan"+n).set({slot:n, link:document.getElementById("c"+n).value, enabled:true}).then(()=>alert("Channel Saved!")); }
-
-function editVault(uid, currentBonus) {
-    const amount = prompt("Current Bonus: Rs " + currentBonus + "\nEnter new Bonus amount:", currentBonus);
-    if(amount !== null) rtdb.ref('users/' + uid).update({ bonus: parseFloat(amount) });
-}
-
-function editPassword(uid) {
-    const newPass = prompt("Enter new password:");
-    if(newPass && newPass.length >= 6) rtdb.ref('users/' + uid).update({ password: newPass }).then(() => alert("Updated!"));
-}
-
-function approveSub(uid, cid) {
+// Full balance editor for Admin
+function fullEditVault(uid) {
     rtdb.ref('users/' + uid).once('value', s => {
         const d = s.val();
-        rtdb.ref('users/' + uid).update({
-            subPoints: (d.subPoints || 0) + 1,
-            completed: (d.completed || "") + "," + cid
-        }).then(() => alert("Bonus Added & Approved!"));
+        const watch = prompt("Current Watch Count:", d.watch || 0);
+        const sub = prompt("Current Sub Points:", d.subPoints || 0);
+        const bonus = prompt("Current Bonus (Rs):", d.bonus || 0);
+        const withdrawn = prompt("Total Withdrawn (Rs):", d.withdrawnAmount || 0);
+        
+        if(watch !== null && sub !== null && bonus !== null && withdrawn !== null) {
+            rtdb.ref('users/' + uid).update({
+                watch: parseInt(watch),
+                subPoints: parseInt(sub),
+                bonus: parseFloat(bonus),
+                withdrawnAmount: parseFloat(withdrawn)
+            }).then(() => alert("Balance Updated Successfully!"));
+        }
     });
 }
 
-function toggleUser(uid, currentStatus) {
-    rtdb.ref('users/' + uid).update({ status: currentStatus ? "disabled" : "active" });
-}
-
-function deleteUser(uid) {
-    if(confirm("Confirm Delete?")) rtdb.ref('users/' + uid).remove();
-}
-
-function loadWithdrawRequests() {
-    rtdb.ref('withdrawRequests').on('value', snap => {
-        const list = document.getElementById("withdrawList");
-        list.innerHTML = "";
+function loadPromoRequests() {
+    rtdb.ref('promotionRequests').on('value', snap => {
+        const list = document.getElementById("promoList"); list.innerHTML = "";
         snap.forEach(child => {
-            const req = child.val();
-            if(req.status === "pending") {
+            const r = child.val();
+            if(r.status === 'pending') {
                 list.innerHTML += `<tr>
-                    <td>${req.email}</td>
-                    <td>Rs ${req.amount}</td>
-                    <td><small>${req.details}</small></td>
+                    <td>${r.email}</td>
+                    <td><b>${r.package}</b></td>
+                    <td>${r.trxId}</td>
+                    <td><a href="${r.link}" target="_blank">Open Link</a></td>
                     <td>
-                        <button class="btn btn-green" onclick="handleWithdrawStatus('${child.key}', 'Approved')">Approve</button>
-                        <button class="btn btn-red" onclick="handleWithdrawStatus('${child.key}', 'Rejected')">Reject</button>
+                        <button class="btn btn-green" onclick="handlePromo('${child.key}', 'Approved')">Approve</button>
+                        <button class="btn btn-red" onclick="handlePromo('${child.key}', 'Rejected')">Reject</button>
                     </td>
                 </tr>`;
             }
@@ -274,8 +207,41 @@ function loadWithdrawRequests() {
     });
 }
 
+function handlePromo(id, status) {
+    rtdb.ref('promotionRequests/' + id).update({ status: status }).then(() => alert("Promo Updated!"));
+}
+
 function handleWithdrawStatus(id, status) {
     rtdb.ref('withdrawRequests/' + id).update({ status: status });
+}
+
+function initSlots() {
+    let vHtml = "<h4>Video Slots</h4>";
+    for(let i=1; i<=10; i++) vHtml += `<div><input id="v${i}" style="width:100px"><button onclick="saveV(${i})">S</button></div>`;
+    document.getElementById("videoSlots").innerHTML = vHtml;
+    let cHtml = "<h4>Channel Slots</h4>";
+    for(let i=1; i<=5; i++) cHtml += `<div><input id="c${i}" style="width:100px"><button onclick="saveC(${i})">S</button></div>`;
+    document.getElementById("channelSlots").innerHTML = cHtml;
+    for(let i=1; i<=10; i++) db.collection("videos").doc("slot"+i).get().then(d=>{if(d.exists)document.getElementById("v"+i).value=d.data().link;});
+    for(let i=1; i<=5; i++) db.collection("channels").doc("chan"+i).get().then(d=>{if(d.exists)document.getElementById("c"+i).value=d.data().link;});
+}
+
+function saveV(n){ db.collection("videos").doc("slot"+n).set({slot:n, link:document.getElementById("v"+n).value, enabled:true}).then(()=>alert("Saved")); }
+function saveC(n){ db.collection("channels").doc("chan"+n).set({slot:n, link:document.getElementById("c"+n).value, enabled:true}).then(()=>alert("Saved")); }
+function editPassword(uid) { const p = prompt("New Password:"); if(p) rtdb.ref('users/'+uid).update({password:p}); }
+function approveSub(uid, cid) { rtdb.ref('users/'+uid).once('value', s => { const d = s.val(); rtdb.ref('users/'+uid).update({ subPoints: (d.subPoints||0)+1, completed: (d.completed||"")+","+cid }); alert("Approved!"); }); }
+function toggleUser(uid, stat) { rtdb.ref('users/'+uid).update({status: stat?'disabled':'active'}); }
+function deleteUser(uid) { if(confirm("Delete?")) rtdb.ref('users/'+uid).remove(); }
+function loadWithdrawRequests() {
+    rtdb.ref('withdrawRequests').on('value', snap => {
+        const list = document.getElementById("withdrawList"); list.innerHTML = "";
+        snap.forEach(child => {
+            const req = child.val();
+            if(req.status === "pending") {
+                list.innerHTML += `<tr><td>${req.email}</td><td>Rs ${req.amount}</td><td>${req.details}</td><td><button class="btn btn-green" onclick="handleWithdrawStatus('${child.key}','Approved')">OK</button></td></tr>`;
+            }
+        });
+    });
 }
 </script>
 </body>
